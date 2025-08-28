@@ -1,4 +1,4 @@
-# 📸 ExternCam – Save Photos & Videos Directly to External USB on Jailbroken iPhone
+# 📸 ExternCamera – Save Photos & Videos Directly to External USB on Jailbroken iPhone
 
 > A custom camera app for **jailbroken iOS devices** that allows you to **save photos and videos directly to external USB storage** via Lightning (using Camera Connection Kit). Perfect for devices with limited internal storage — like the **iPhone SE (2016) with 16GB**.
 
@@ -51,17 +51,7 @@ Perfect for photographers, travelers, or anyone with a low-storage iPhone!
 
 ## 🖼️ How It Works
 
-[User] 
-   ↓
-[Open KameraCustom]
-   ↓
-[App detects USB drive (if connected)]
-   ↓
-[Choose: Save to Internal or USB]
-   ↓
-[Take photo / Record video]
-   ↓
-[File saved DIRECTLY to USB drive]
+[User] -> [Open ExternCamera] -> [App detects USB drive (if connected)] -> [Choose: Save to Internal or USB] -> [Take photo / Record video] -> [File saved DIRECTLY to USB drive]
 
 
 #📁 Path on device:  
@@ -72,7 +62,7 @@ Perfect for photographers, travelers, or anyone with a low-storage iPhone!
 ## 🚀 How to Use
 
 1. 🔌 Connect USB drive via CCK + OTG
-2. 📱 Open **KameraCustom**
+2. 📱 Open **ExternCamera**
 3. 💬 Choose: _"Save to Internal"_ or _"Save to External"_
 4. 📸 Take photos or record videos
 5. 💾 Files saved instantly to your USB
@@ -108,8 +98,8 @@ Follow these steps to **build the app and install it on your jailbroken iPhone**
 
 ### 3. Configure Code Signing
 
-1. Click on the project name (`KameraCustom`) in the left sidebar.
-2. Under **Target**, select `KameraCustom`.
+1. Click on the project name (`ExternCamera`) in the left sidebar.
+2. Under **Target**, select `ExternCamera`.
 3. Go to **Signing & Capabilities**.
 4. Check: ✅ **Automatically manage signing**
 5. In **Team**, select your **Apple ID**.
@@ -138,7 +128,7 @@ Follow these steps to **build the app and install it on your jailbroken iPhone**
    - Sign it with your Apple ID
    - Install it on your iPhone
 
-> First time? You may see: _"Unable to install ‘KameraCustom’"_ — just tap **Try Again**.
+> First time? You may see: _"Unable to install ‘ExternCamera’"_ — just tap **Try Again**.
 
 ---
 
@@ -149,7 +139,7 @@ After install, open:
 - Tap your **Apple ID profile** (e.g., "Apple Development: YOUR_EMAIL")
 - Tap **"Trust [Your Email]"**
 
-Now go back and open the **KameraCustom** app.
+Now go back and open the **ExternCamera** app.
 
 ---
 
@@ -169,7 +159,7 @@ If you want to **save the app as .ipa** for backup or share (without Xcode), fol
    - **Development** → **Your Apple ID Team** → **Export as .ipa**
 6. Save the `.ipa` file to your Mac.
 
-> File location: e.g., `~/Desktop/KameraCustom.ipa`
+> File location: e.g., `~/Desktop/ExternCamera.ipa`
 
 ---
 
@@ -200,7 +190,7 @@ You can install the `.ipa` again without Xcode using free tools:
    - **Apple Camera Connection Kit (CCK)**
    - **OTG Adapter (Lightning to USB-A)**
 2. Make sure USB is **formatted as FAT32**
-3. Open **KameraCustom**
+3. Open **ExternCamera**
 4. When taking a photo/video:
    - Choose: **"Save to External"**
 5. File is saved directly to:
