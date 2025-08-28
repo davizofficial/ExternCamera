@@ -171,7 +171,7 @@ class ViewController: UIViewController {
     }
     
     private func showStorageSelection(completion: @escaping (Bool) -> Void) {
-        let hasExternal = storageManager.isExternalDriveConnected()
+        let hasExternal = storageManager.isSDCardConnected()
         
         let alert = UIAlertController(title: "Simpan ke", message: nil, preferredStyle: .actionSheet)
         
@@ -180,7 +180,7 @@ class ViewController: UIViewController {
         })
         
         if hasExternal {
-            alert.addAction(UIAlertAction(title: "Memori Eksternal", style: .default) { _ in
+            alert.addAction(UIAlertAction(title: "microSD Card", style: .default) { _ in
                 completion(true)
             })
         }
