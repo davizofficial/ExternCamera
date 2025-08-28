@@ -54,32 +54,8 @@ class CameraManager: NSObject {
     func capturePhoto(toExternal: Bool, completion: @escaping (Bool, URL?) -> Void) {
         let settings = AVCapturePhotoSettings()
         settings.flashMode = .off
-        
         let delegate = PhotoCaptureDelegate(toExternal: toExternal, completion: completion)
         photoOutput.capturePhoto(with: settings, delegate: delegate)
-    }
-    
-    func startRecording(completion: @escaping (URL?, Bool) -> Void) {
-        guard let connection = videoOutput.connection(with: .video) else {
-            completion(nil, false)
-            return
-        }
-        
-        let filename = "VID_\(Date().toString()).mov"
-        var url: URL
-        
-        if let ext = StorageManager().externalDriveURL {
-            url = ext.appendingPathComponent(filename)
-        } else {
-            url = StorageManager().internalDocumentsURL.appendingPathComponent(filename)
-        }
-        
-        videoOutput.startRecording(to: url, recordingDelegate: VideoCaptureDelegate(completion: completion))
-    }
-    
-    func stopRecording(completion: @escaping (URL?, Bool) -> Void) {
-        videoOutput.stopRecording()
-        VideoCaptureDelegate.recordingCompletion = completion
     }
     
     func switchCamera() {
@@ -127,5 +103,26 @@ class CameraManager: NSObject {
         } catch {
             print("Zoom gagal: \(error)")
         }
+    }
+}
+
+// MARK: - Video Recording Extension
+extension CameraManager {
+    func startRecording(completion: @escaping (URL?, Bool) -> Void) {
+        guard let connection = videoOutput.connection(with: .video) else {
+            completion(nil, false)
+            return
+        }
+        
+        let filename = "VID_\(Date().toString()).mov"
+        let saveDirectory = StorageManager().getSaveDirectory(forExternal: true)
+        let url = saveDirectory.appendingPathComponent(filename)
+        
+        videoOutput.startRecording(to: url, recordingDelegate: VideoCaptureDelegate(completion: completion))
+    }
+    
+    func stopRecording(completion: @escaping (URL?, Bool) -> Void) {
+        videoOutput.stopRecording()
+        VideoCaptureDelegate.recordingCompletion = completion
     }
 }
