@@ -58,5 +58,14 @@
     <array>
         <string>audio</string>
     </array>
+
+    <!-- =============== FILE SHARING (UNTUK MICROSD) =============== -->
+    <!-- Agar folder Documents muncul di Files app -->
+    <key>UIFileSharingEnabled</key>
+    <true/>
+
+    <!-- Agar bisa buka dokumen dari app lain (misal: microSD) -->
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
 </dict>
 </plist>
