@@ -22,23 +22,15 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
         }
         
         let filename = "IMG_\(Date().toString()).jpg"
-        var url: URL?
-        var success = false
-        
-        if toExternal, let externalURL = storageManager.externalDriveURL {
-            url = externalURL.appendingPathComponent(filename)
-        } else {
-            url = storageManager.internalDocumentsURL.appendingPathComponent(filename)
-        }
+        let saveDirectory = storageManager.getSaveDirectory(forExternal: toExternal)
+        let url = saveDirectory.appendingPathComponent(filename)
         
         do {
-            try imageData.write(to: url!)
-            success = true
+            try imageData.write(to: url)
+            completion(true, url)
         } catch {
             print("Gagal simpan: \(error)")
-            success = false
+            completion(false, nil)
         }
-        
-        completion(success, url)
     }
 }
