@@ -2,7 +2,6 @@ import AVFoundation
 
 class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
     static var recordingCompletion: ((URL?, Bool) -> Void)?
-    
     private let completion: (URL?, Bool) -> Void
     
     init(completion: @escaping (URL?, Bool) -> Void) {
