@@ -23,6 +23,10 @@ class TimerButton: UIButton {
         alert.addAction(UIAlertAction(title: "3 Detik", style: .default) { _ in completion(3) })
         alert.addAction(UIAlertAction(title: "10 Detik", style: .default) { _ in completion(10) })
         alert.addAction(UIAlertAction(title: "Batal", style: .cancel))
-        UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true)
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(alert, animated: true)
+        }
     }
 }

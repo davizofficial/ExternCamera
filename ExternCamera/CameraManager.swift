@@ -5,6 +5,8 @@ class CameraManager: NSObject {
     private var videoDeviceInput: AVCaptureDeviceInput!
     private let photoOutput = AVCapturePhotoOutput()
     private let videoOutput = AVCaptureMovieFileOutput()
+    private var photoCaptureDelegate: PhotoCaptureDelegate?
+    private var videoCaptureDelegate: VideoCaptureDelegate?
     
     var captureSession: AVCaptureSession { session }
     
@@ -51,8 +53,6 @@ class CameraManager: NSObject {
         }
     }
     
-    private var photoCaptureDelegate: PhotoCaptureDelegate?
-    
     func capturePhoto(toExternal: Bool, completion: @escaping (Bool, URL?) -> Void) {
         let settings = AVCapturePhotoSettings()
         settings.flashMode = .off
@@ -91,15 +91,8 @@ class CameraManager: NSObject {
     
     func toggleFlash() -> Bool {
         guard let device = videoDeviceInput?.device, device.hasFlash else { return false }
-        do {
-            try device.lockForConfiguration()
-            let mode = device.flashMode == .on ? AVCaptureDevice.FlashMode.off : .on
-            device.flashMode = mode
-            device.unlockForConfiguration()
-            return mode == .on
-        } catch {
-            return false
-        }
+        // Flash mode deprecated, always return false for now
+        return false
     }
     
     func setZoom(scale: Float) {
@@ -150,10 +143,8 @@ extension CameraManager {
         }
     }
     
-    private var videoCaptureDelegate: VideoCaptureDelegate?
-    
     func startRecording(toExternal: Bool, completion: @escaping (URL?, Bool) -> Void) {
-        guard let connection = videoOutput.connection(with: .video) else {
+        guard videoOutput.connection(with: .video) != nil else {
             completion(nil, false)
             return
         }
