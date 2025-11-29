@@ -24,6 +24,7 @@ class MainCameraViewController: UIViewController {
     // Top controls
     private let flashButton = UIButton(type: .system)
     private let hdrButton = UIButton(type: .system)
+    private let livePhotoButton = UIButton(type: .system)
     private let timerButton = UIButton(type: .system)
     private let settingsButton = UIButton(type: .system)
     
@@ -34,6 +35,7 @@ class MainCameraViewController: UIViewController {
     
     // Overlays
     private let gridOverlay = GridOverlayView()
+    private let focusGuideView = UIView()
     private let recordingLabel = UILabel()
     private let zoomSlider = UISlider()
     
@@ -71,18 +73,15 @@ class MainCameraViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .black
         
-        // Preview with border/frame
+        // Preview fullscreen tanpa border
         view.addSubview(previewView)
-        previewView.layer.cornerRadius = 20
-        previewView.layer.masksToBounds = true
-        previewView.layer.borderWidth = 2
-        previewView.layer.borderColor = UIColor.white.withAlphaComponent(0.3).cgColor
         
         // Grid overlay
         view.addSubview(gridOverlay)
-        gridOverlay.layer.cornerRadius = 20
-        gridOverlay.layer.masksToBounds = true
         gridOverlay.isHidden = !settings.showGrid
+        
+        // Focus guide (kotak kuning di tengah seperti di gambar)
+        setupFocusGuide()
         
         // Top controls
         setupTopControls()
@@ -104,6 +103,38 @@ class MainCameraViewController: UIViewController {
         setupGestures()
     }
     
+    private func setupFocusGuide() {
+        view.addSubview(focusGuideView)
+        focusGuideView.layer.borderColor = UIColor.systemYellow.cgColor
+        focusGuideView.layer.borderWidth = 1.5
+        focusGuideView.backgroundColor = .clear
+        focusGuideView.isUserInteractionEnabled = false
+        
+        // Tambahkan corner indicators seperti di gambar
+        let cornerSize: CGFloat = 20
+        let corners = [
+            (CGPoint(x: 0, y: 0), [CGPoint(x: 0, y: cornerSize), CGPoint(x: 0, y: 0), CGPoint(x: cornerSize, y: 0)]),
+            (CGPoint(x: 1, y: 0), [CGPoint(x: -cornerSize, y: 0), CGPoint(x: 0, y: 0), CGPoint(x: 0, y: cornerSize)]),
+            (CGPoint(x: 0, y: 1), [CGPoint(x: 0, y: -cornerSize), CGPoint(x: 0, y: 0), CGPoint(x: cornerSize, y: 0)]),
+            (CGPoint(x: 1, y: 1), [CGPoint(x: -cornerSize, y: 0), CGPoint(x: 0, y: 0), CGPoint(x: 0, y: -cornerSize)])
+        ]
+        
+        for (anchor, points) in corners {
+            let path = UIBezierPath()
+            path.move(to: points[0])
+            path.addLine(to: points[1])
+            path.addLine(to: points[2])
+            
+            let shapeLayer = CAShapeLayer()
+            shapeLayer.path = path.cgPath
+            shapeLayer.strokeColor = UIColor.systemYellow.cgColor
+            shapeLayer.lineWidth = 2
+            shapeLayer.fillColor = UIColor.clear.cgColor
+            shapeLayer.position = CGPoint(x: anchor.x * 200, y: anchor.y * 200)
+            focusGuideView.layer.addSublayer(shapeLayer)
+        }
+    }
+    
     private func setupTopControls() {
         view.addSubview(topControlsView)
         topControlsView.backgroundColor = .clear
@@ -117,21 +148,30 @@ class MainCameraViewController: UIViewController {
         
         // HDR button
         hdrButton.setTitle("HDR", for: .normal)
-        hdrButton.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
+        hdrButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         hdrButton.tintColor = .white
         hdrButton.addTarget(self, action: #selector(didTapHDR), for: .touchUpInside)
         topControlsView.addSubview(hdrButton)
+        
+        // Live Photo button
+        livePhotoButton.setImage(UIImage(systemName: "livephoto"), for: .normal)
+        livePhotoButton.tintColor = .white
+        livePhotoButton.addTarget(self, action: #selector(didTapLivePhoto), for: .touchUpInside)
+        addButtonAnimation(to: livePhotoButton)
+        topControlsView.addSubview(livePhotoButton)
         
         // Timer button
         timerButton.setImage(UIImage(systemName: "timer"), for: .normal)
         timerButton.tintColor = .white
         timerButton.addTarget(self, action: #selector(didTapTimer), for: .touchUpInside)
+        addButtonAnimation(to: timerButton)
         topControlsView.addSubview(timerButton)
         
-        // Settings button
+        // Settings button (gear icon)
         settingsButton.setImage(UIImage(systemName: "gearshape.fill"), for: .normal)
         settingsButton.tintColor = .white
         settingsButton.addTarget(self, action: #selector(didTapSettings), for: .touchUpInside)
+        addButtonAnimation(to: settingsButton)
         topControlsView.addSubview(settingsButton)
     }
     
@@ -195,11 +235,11 @@ class MainCameraViewController: UIViewController {
         zoomSlider.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            // Preview with padding (not fullscreen)
-            previewView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60),
-            previewView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            previewView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-            previewView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -180),
+            // Preview fullscreen
+            previewView.topAnchor.constraint(equalTo: view.topAnchor),
+            previewView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            previewView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            previewView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             // Grid overlay matches preview
             gridOverlay.topAnchor.constraint(equalTo: previewView.topAnchor),
@@ -235,24 +275,50 @@ class MainCameraViewController: UIViewController {
             zoomSlider.widthAnchor.constraint(equalToConstant: 150),
         ])
         
-        // Top controls buttons
+        // Focus guide di tengah
+        focusGuideView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            focusGuideView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            focusGuideView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            focusGuideView.widthAnchor.constraint(equalToConstant: 200),
+            focusGuideView.heightAnchor.constraint(equalToConstant: 200)
+        ])
+        
+        // Top controls buttons - layout seperti di gambar
         flashButton.translatesAutoresizingMaskIntoConstraints = false
         hdrButton.translatesAutoresizingMaskIntoConstraints = false
+        livePhotoButton.translatesAutoresizingMaskIntoConstraints = false
         timerButton.translatesAutoresizingMaskIntoConstraints = false
         settingsButton.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
+            // Flash (X) di kiri
             flashButton.leadingAnchor.constraint(equalTo: topControlsView.leadingAnchor, constant: 20),
             flashButton.centerYAnchor.constraint(equalTo: topControlsView.centerYAnchor),
+            flashButton.widthAnchor.constraint(equalToConstant: 44),
+            flashButton.heightAnchor.constraint(equalToConstant: 44),
             
-            hdrButton.leadingAnchor.constraint(equalTo: flashButton.trailingAnchor, constant: 20),
+            // HDR di tengah kiri
+            hdrButton.leadingAnchor.constraint(equalTo: flashButton.trailingAnchor, constant: 30),
             hdrButton.centerYAnchor.constraint(equalTo: topControlsView.centerYAnchor),
             
-            settingsButton.trailingAnchor.constraint(equalTo: topControlsView.trailingAnchor, constant: -20),
-            settingsButton.centerYAnchor.constraint(equalTo: topControlsView.centerYAnchor),
+            // Live Photo di tengah
+            livePhotoButton.centerXAnchor.constraint(equalTo: topControlsView.centerXAnchor),
+            livePhotoButton.centerYAnchor.constraint(equalTo: topControlsView.centerYAnchor),
+            livePhotoButton.widthAnchor.constraint(equalToConstant: 44),
+            livePhotoButton.heightAnchor.constraint(equalToConstant: 44),
             
+            // Timer di kanan
             timerButton.trailingAnchor.constraint(equalTo: settingsButton.leadingAnchor, constant: -20),
             timerButton.centerYAnchor.constraint(equalTo: topControlsView.centerYAnchor),
+            timerButton.widthAnchor.constraint(equalToConstant: 44),
+            timerButton.heightAnchor.constraint(equalToConstant: 44),
+            
+            // Settings (profile) di paling kanan
+            settingsButton.trailingAnchor.constraint(equalTo: topControlsView.trailingAnchor, constant: -20),
+            settingsButton.centerYAnchor.constraint(equalTo: topControlsView.centerYAnchor),
+            settingsButton.widthAnchor.constraint(equalToConstant: 44),
+            settingsButton.heightAnchor.constraint(equalToConstant: 44),
         ])
         
         // Bottom controls buttons
@@ -394,6 +460,11 @@ class MainCameraViewController: UIViewController {
         updateHDRButton()
     }
     
+    @objc private func didTapLivePhoto() {
+        settings.livePhotoEnabled.toggle()
+        updateLivePhotoButton()
+    }
+    
     @objc private func didTapTimer() {
         let modes: [TimerMode] = [.off, .three, .ten]
         let currentIndex = modes.firstIndex(of: settings.timerMode) ?? 0
@@ -464,13 +535,25 @@ class MainCameraViewController: UIViewController {
         case .video:
             flashButton.isHidden = false
             hdrButton.isHidden = true
+            livePhotoButton.isHidden = true
+            timerButton.isHidden = true
         case .photo, .square:
             flashButton.isHidden = false
             hdrButton.isHidden = false
+            livePhotoButton.isHidden = false
+            timerButton.isHidden = false
         case .pano:
             flashButton.isHidden = true
             hdrButton.isHidden = true
+            livePhotoButton.isHidden = true
+            timerButton.isHidden = true
         }
+        
+        // Update button states
+        updateFlashButton()
+        updateHDRButton()
+        updateLivePhotoButton()
+        updateTimerButton()
     }
     
     private func updateFlashButton() {
@@ -487,6 +570,11 @@ class MainCameraViewController: UIViewController {
     
     private func updateHDRButton() {
         hdrButton.alpha = settings.hdrEnabled ? 1.0 : 0.5
+    }
+    
+    private func updateLivePhotoButton() {
+        let iconName = settings.livePhotoEnabled ? "livephoto" : "livephoto.slash"
+        livePhotoButton.setImage(UIImage(systemName: iconName), for: .normal)
     }
     
     private func updateTimerButton() {
