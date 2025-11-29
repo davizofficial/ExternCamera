@@ -8,6 +8,7 @@ class CameraSettings {
     // Keys
     private let gridKey = "showGrid"
     private let hdrKey = "hdrEnabled"
+    private let livePhotoKey = "livePhotoEnabled"
     private let saveToExternalKey = "saveToExternal"
     private let flashModeKey = "flashMode"
     private let timerModeKey = "timerMode"
@@ -20,6 +21,11 @@ class CameraSettings {
     var hdrEnabled: Bool {
         get { defaults.bool(forKey: hdrKey) }
         set { defaults.set(newValue, forKey: hdrKey) }
+    }
+    
+    var livePhotoEnabled: Bool {
+        get { defaults.bool(forKey: livePhotoKey) }
+        set { defaults.set(newValue, forKey: livePhotoKey) }
     }
     
     var saveToExternal: Bool {
