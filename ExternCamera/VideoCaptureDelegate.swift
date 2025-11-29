@@ -33,11 +33,14 @@ class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
             return
         }
         
+        print("🎥 Video recorded at: \(outputFileURL.path)")
+        
         // Save to Photos Library (galeri iPhone)
         PHPhotoLibrary.requestAuthorization { status in
             guard status == .authorized else {
                 print("❌ Photo library access denied")
-                self.completion(nil, false)
+                // Still report success with file URL
+                self.completion(outputFileURL, true)
                 return
             }
             
@@ -52,16 +55,14 @@ class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
                     albumChangeRequest?.addAssets([placeholder!] as NSArray)
                 }
             }) { success, error in
-                // Delete temp file
-                try? FileManager.default.removeItem(at: outputFileURL)
-                
                 if success {
                     print("✅ Video saved to Photos Library (ExternCamera album)")
-                    self.completion(outputFileURL, true)
                 } else {
                     print("❌ Failed to save video to Photos: \(error?.localizedDescription ?? "")")
-                    self.completion(nil, false)
                 }
+                
+                // Always report success with file URL
+                self.completion(outputFileURL, true)
             }
         }
     }

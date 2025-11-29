@@ -26,18 +26,25 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
             return
         }
         
-        guard let imageData = photo.fileDataRepresentation(),
-              let image = UIImage(data: imageData) else {
+        guard let imageData = photo.fileDataRepresentation() else {
             print("❌ Failed to get image data")
             completion(false, nil)
             return
         }
         
-        // Save to Photos Library (galeri iPhone)
+        // ALWAYS save to Photos Library first
+        self.saveToPhotosLibrary(imageData: imageData)
+        
+        // ALSO save to file system (internal or external)
+        self.saveToFileSystem(imageData: imageData)
+    }
+    
+    private func saveToPhotosLibrary(imageData: Data) {
+        guard let image = UIImage(data: imageData) else { return }
+        
         PHPhotoLibrary.requestAuthorization { status in
             guard status == .authorized else {
                 print("❌ Photo library access denied")
-                self.completion(false, nil)
                 return
             }
             
@@ -53,12 +60,25 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
             }) { success, error in
                 if success {
                     print("✅ Photo saved to Photos Library (ExternCamera album)")
-                    self.completion(true, nil)
                 } else {
                     print("❌ Failed to save to Photos: \(error?.localizedDescription ?? "")")
-                    self.completion(false, nil)
                 }
             }
+        }
+    }
+    
+    private func saveToFileSystem(imageData: Data) {
+        let directory = storageManager.getSaveDirectory(forExternal: toExternal)
+        let filename = "IMG_\(Date().formattedForFilename()).jpg"
+        let fileURL = directory.appendingPathComponent(filename)
+        
+        do {
+            try imageData.write(to: fileURL)
+            print("✅ Photo saved to file system: \(fileURL.path)")
+            completion(true, fileURL)
+        } catch {
+            print("❌ Failed to save to file system: \(error)")
+            completion(false, nil)
         }
     }
     

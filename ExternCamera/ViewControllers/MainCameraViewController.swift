@@ -104,35 +104,11 @@ class MainCameraViewController: UIViewController {
     }
     
     private func setupFocusGuide() {
+        // Focus guide disembunyikan secara default
         view.addSubview(focusGuideView)
-        focusGuideView.layer.borderColor = UIColor.systemYellow.cgColor
-        focusGuideView.layer.borderWidth = 1.5
         focusGuideView.backgroundColor = .clear
         focusGuideView.isUserInteractionEnabled = false
-        
-        // Tambahkan corner indicators seperti di gambar
-        let cornerSize: CGFloat = 20
-        let corners = [
-            (CGPoint(x: 0, y: 0), [CGPoint(x: 0, y: cornerSize), CGPoint(x: 0, y: 0), CGPoint(x: cornerSize, y: 0)]),
-            (CGPoint(x: 1, y: 0), [CGPoint(x: -cornerSize, y: 0), CGPoint(x: 0, y: 0), CGPoint(x: 0, y: cornerSize)]),
-            (CGPoint(x: 0, y: 1), [CGPoint(x: 0, y: -cornerSize), CGPoint(x: 0, y: 0), CGPoint(x: cornerSize, y: 0)]),
-            (CGPoint(x: 1, y: 1), [CGPoint(x: -cornerSize, y: 0), CGPoint(x: 0, y: 0), CGPoint(x: 0, y: -cornerSize)])
-        ]
-        
-        for (anchor, points) in corners {
-            let path = UIBezierPath()
-            path.move(to: points[0])
-            path.addLine(to: points[1])
-            path.addLine(to: points[2])
-            
-            let shapeLayer = CAShapeLayer()
-            shapeLayer.path = path.cgPath
-            shapeLayer.strokeColor = UIColor.systemYellow.cgColor
-            shapeLayer.lineWidth = 2
-            shapeLayer.fillColor = UIColor.clear.cgColor
-            shapeLayer.position = CGPoint(x: anchor.x * 200, y: anchor.y * 200)
-            focusGuideView.layer.addSublayer(shapeLayer)
-        }
+        focusGuideView.isHidden = true
     }
     
     private func setupTopControls() {
