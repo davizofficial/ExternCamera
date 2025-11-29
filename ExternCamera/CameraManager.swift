@@ -53,9 +53,15 @@ class CameraManager: NSObject {
         }
     }
     
+    private var currentFlashMode: AVCaptureDevice.FlashMode = .off
+    
     func capturePhoto(toExternal: Bool, completion: @escaping (Bool, URL?) -> Void) {
         let settings = AVCapturePhotoSettings()
-        settings.flashMode = .off
+        
+        // Set flash mode
+        if photoOutput.supportedFlashModes.contains(currentFlashMode) {
+            settings.flashMode = currentFlashMode
+        }
         
         // Retain delegate to prevent deallocation
         photoCaptureDelegate = PhotoCaptureDelegate(toExternal: toExternal) { [weak self] success, url in
@@ -89,10 +95,26 @@ class CameraManager: NSObject {
         session.commitConfiguration()
     }
     
-    func toggleFlash() -> Bool {
-        guard let device = videoDeviceInput?.device, device.hasFlash else { return false }
-        // Flash mode deprecated, always return false for now
-        return false
+    func toggleFlash() -> AVCaptureDevice.FlashMode {
+        guard let device = videoDeviceInput?.device, device.hasFlash else { return .off }
+        
+        // Cycle through flash modes: off -> on -> auto -> off
+        switch currentFlashMode {
+        case .off:
+            currentFlashMode = .on
+        case .on:
+            currentFlashMode = .auto
+        case .auto:
+            currentFlashMode = .off
+        @unknown default:
+            currentFlashMode = .off
+        }
+        
+        return currentFlashMode
+    }
+    
+    func getFlashMode() -> AVCaptureDevice.FlashMode {
+        return currentFlashMode
     }
     
     func setZoom(scale: Float) {
