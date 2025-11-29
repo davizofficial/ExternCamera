@@ -54,6 +54,13 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>App ini butuh akses mikrofon saat merekam video.</string>
 
+    <!-- Izin Akses Photo Library (untuk simpan foto/video) -->
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>App ini butuh akses untuk menyimpan foto dan video ke galeri iPhone Anda.</string>
+    
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>App ini butuh akses untuk menyimpan foto dan video ke galeri iPhone Anda.</string>
+
     <!-- =============== SUPPORTED INTERFACES =============== -->
     <key>UIRequiredDeviceCapabilities</key>
     <array>

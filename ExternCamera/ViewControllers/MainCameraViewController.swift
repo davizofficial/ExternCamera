@@ -385,10 +385,7 @@ class MainCameraViewController: UIViewController {
     }
     
     @objc private func didTapFlash() {
-        let modes: [FlashMode] = [.off, .auto, .on]
-        let currentIndex = modes.firstIndex(of: settings.flashMode) ?? 0
-        let nextIndex = (currentIndex + 1) % modes.count
-        settings.flashMode = modes[nextIndex]
+        _ = cameraManager.toggleFlash()
         updateFlashButton()
     }
     
@@ -478,10 +475,12 @@ class MainCameraViewController: UIViewController {
     
     private func updateFlashButton() {
         let iconName: String
-        switch settings.flashMode {
+        let flashMode = cameraManager.getFlashMode()
+        switch flashMode {
         case .off: iconName = "bolt.slash.fill"
         case .auto: iconName = "bolt.badge.a.fill"
         case .on: iconName = "bolt.fill"
+        @unknown default: iconName = "bolt.slash.fill"
         }
         flashButton.setImage(UIImage(systemName: iconName), for: .normal)
     }

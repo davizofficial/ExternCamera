@@ -1,4 +1,5 @@
 import AVFoundation
+import Photos
 
 class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
     private let completion: (URL?, Bool) -> Void
@@ -26,13 +27,70 @@ class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
             return
         }
         
-        let success = FileManager.default.fileExists(atPath: outputFileURL.path)
-        if success {
-            print("✅ Video saved successfully: \(outputFileURL.path)")
-        } else {
+        guard FileManager.default.fileExists(atPath: outputFileURL.path) else {
             print("❌ Video file not found at: \(outputFileURL.path)")
+            completion(nil, false)
+            return
         }
         
-        completion(outputFileURL, success)
+        // Save to Photos Library (galeri iPhone)
+        PHPhotoLibrary.requestAuthorization { status in
+            guard status == .authorized else {
+                print("❌ Photo library access denied")
+                self.completion(nil, false)
+                return
+            }
+            
+            PHPhotoLibrary.shared().performChanges({
+                let request = PHAssetCreationRequest.forAsset()
+                request.addResource(with: .video, fileURL: outputFileURL, options: nil)
+                
+                // Create album "ExternCamera" if doesn't exist
+                if let album = self.getOrCreateAlbum(named: "ExternCamera") {
+                    let placeholder = request.placeholderForCreatedAsset
+                    let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
+                    albumChangeRequest?.addAssets([placeholder!] as NSArray)
+                }
+            }) { success, error in
+                // Delete temp file
+                try? FileManager.default.removeItem(at: outputFileURL)
+                
+                if success {
+                    print("✅ Video saved to Photos Library (ExternCamera album)")
+                    self.completion(outputFileURL, true)
+                } else {
+                    print("❌ Failed to save video to Photos: \(error?.localizedDescription ?? "")")
+                    self.completion(nil, false)
+                }
+            }
+        }
+    }
+    
+    private func getOrCreateAlbum(named albumName: String) -> PHAssetCollection? {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)
+        let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        
+        if let album = collection.firstObject {
+            return album
+        }
+        
+        // Create album if doesn't exist
+        var albumPlaceholder: PHObjectPlaceholder?
+        do {
+            try PHPhotoLibrary.shared().performChangesAndWait {
+                let createAlbumRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+                albumPlaceholder = createAlbumRequest.placeholderForCreatedAssetCollection
+            }
+            
+            if let placeholder = albumPlaceholder {
+                let collectionFetchResult = PHAssetCollection.fetchAssetCollections(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
+                return collectionFetchResult.firstObject
+            }
+        } catch {
+            print("❌ Failed to create album: \(error)")
+        }
+        
+        return nil
     }
 }

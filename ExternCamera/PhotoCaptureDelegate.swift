@@ -1,4 +1,5 @@
 import AVFoundation
+import Photos
 
 class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     private let toExternal: Bool
@@ -24,25 +25,67 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
             return
         }
         
-        guard let imageData = photo.fileDataRepresentation() else {
+        guard let imageData = photo.fileDataRepresentation(),
+              let image = UIImage(data: imageData) else {
             print("❌ Failed to get image data")
             completion(false, nil)
             return
         }
         
-        let filename = "IMG_\(Date().toString()).jpg"
-        let saveDirectory = storageManager.getSaveDirectory(forExternal: toExternal)
-        let url = saveDirectory.appendingPathComponent(filename)
-        
-        print("📸 Saving photo to: \(url.path)")
-        
-        do {
-            try imageData.write(to: url)
-            print("✅ Photo saved successfully: \(url.path)")
-            completion(true, url)
-        } catch {
-            print("❌ Failed to save photo: \(error.localizedDescription)")
-            completion(false, nil)
+        // Save to Photos Library (galeri iPhone)
+        PHPhotoLibrary.requestAuthorization { status in
+            guard status == .authorized else {
+                print("❌ Photo library access denied")
+                self.completion(false, nil)
+                return
+            }
+            
+            PHPhotoLibrary.shared().performChanges({
+                let request = PHAssetCreationRequest.creationRequestForAsset(from: image)
+                
+                // Create album "ExternCamera" if doesn't exist
+                if let album = self.getOrCreateAlbum(named: "ExternCamera") {
+                    let placeholder = request.placeholderForCreatedAsset
+                    let albumChangeRequest = PHAssetCollectionChangeRequest(for: album)
+                    albumChangeRequest?.addAssets([placeholder!] as NSArray)
+                }
+            }) { success, error in
+                if success {
+                    print("✅ Photo saved to Photos Library (ExternCamera album)")
+                    self.completion(true, nil)
+                } else {
+                    print("❌ Failed to save to Photos: \(error?.localizedDescription ?? "")")
+                    self.completion(false, nil)
+                }
+            }
         }
+    }
+    
+    private func getOrCreateAlbum(named albumName: String) -> PHAssetCollection? {
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.predicate = NSPredicate(format: "title = %@", albumName)
+        let collection = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: fetchOptions)
+        
+        if let album = collection.firstObject {
+            return album
+        }
+        
+        // Create album if doesn't exist
+        var albumPlaceholder: PHObjectPlaceholder?
+        do {
+            try PHPhotoLibrary.shared().performChangesAndWait {
+                let createAlbumRequest = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: albumName)
+                albumPlaceholder = createAlbumRequest.placeholderForCreatedAssetCollection
+            }
+            
+            if let placeholder = albumPlaceholder {
+                let collectionFetchResult = PHAssetCollection.fetchAssetCollections(withLocalIdentifiers: [placeholder.localIdentifier], options: nil)
+                return collectionFetchResult.firstObject
+            }
+        } catch {
+            print("❌ Failed to create album: \(error)")
+        }
+        
+        return nil
     }
 }
