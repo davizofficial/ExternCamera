@@ -12,6 +12,8 @@ class SettingsViewController: UIViewController {
     private enum Section: Int, CaseIterable {
         case storage
         case camera
+        case photo
+        case video
         case about
     }
     
@@ -64,6 +66,8 @@ extension SettingsViewController: UITableViewDataSource {
         switch section {
         case .storage: return 3
         case .camera: return 2
+        case .photo: return 2
+        case .video: return 1
         case .about: return 2
         }
     }
@@ -113,6 +117,15 @@ extension SettingsViewController: UITableViewDataSource {
                 )
                 return cell
             } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+                cell.textLabel?.text = "Preserve Settings"
+                cell.detailTextLabel?.text = "Camera Mode, Filter"
+                cell.accessoryType = .disclosureIndicator
+                return cell
+            }
+            
+        case .photo:
+            if indexPath.row == 0 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
                 cell.configure(
                     title: "Auto HDR",
@@ -122,7 +135,24 @@ extension SettingsViewController: UITableViewDataSource {
                     }
                 )
                 return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
+                cell.configure(
+                    title: "Live Photo",
+                    isOn: settings.livePhotoEnabled,
+                    onChange: { [weak self] isOn in
+                        self?.settings.livePhotoEnabled = isOn
+                    }
+                )
+                return cell
             }
+            
+        case .video:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+            cell.textLabel?.text = "Record Video"
+            cell.detailTextLabel?.text = "1080p at 30 fps"
+            cell.accessoryType = .disclosureIndicator
+            return cell
             
         case .about:
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
@@ -147,6 +177,8 @@ extension SettingsViewController: UITableViewDataSource {
         switch section {
         case .storage: return "Storage"
         case .camera: return "Camera"
+        case .photo: return "Photo"
+        case .video: return "Video"
         case .about: return "About"
         }
     }
@@ -154,10 +186,14 @@ extension SettingsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         guard let section = Section(rawValue: section) else { return nil }
         
-        if section == .storage {
+        switch section {
+        case .storage:
             return "Connect USB drive via Lightning Camera Connection Kit. USB must be formatted as FAT32."
+        case .photo:
+            return "HDR blends the best parts of separate exposures into a single photo. Live Photo captures 1.5 seconds of motion."
+        default:
+            return nil
         }
-        return nil
     }
 }
 
