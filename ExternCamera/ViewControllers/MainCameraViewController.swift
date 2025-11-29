@@ -71,13 +71,17 @@ class MainCameraViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .black
         
-        // Preview
+        // Preview with border/frame
         view.addSubview(previewView)
-        previewView.frame = view.bounds
+        previewView.layer.cornerRadius = 20
+        previewView.layer.masksToBounds = true
+        previewView.layer.borderWidth = 2
+        previewView.layer.borderColor = UIColor.white.withAlphaComponent(0.3).cgColor
         
         // Grid overlay
         view.addSubview(gridOverlay)
-        gridOverlay.frame = view.bounds
+        gridOverlay.layer.cornerRadius = 20
+        gridOverlay.layer.masksToBounds = true
         gridOverlay.isHidden = !settings.showGrid
         
         // Top controls
@@ -182,6 +186,8 @@ class MainCameraViewController: UIViewController {
     }
     
     private func setupConstraints() {
+        previewView.translatesAutoresizingMaskIntoConstraints = false
+        gridOverlay.translatesAutoresizingMaskIntoConstraints = false
         topControlsView.translatesAutoresizingMaskIntoConstraints = false
         bottomControlsView.translatesAutoresizingMaskIntoConstraints = false
         modeSelector.translatesAutoresizingMaskIntoConstraints = false
@@ -189,6 +195,18 @@ class MainCameraViewController: UIViewController {
         zoomSlider.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
+            // Preview with padding (not fullscreen)
+            previewView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60),
+            previewView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            previewView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            previewView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -180),
+            
+            // Grid overlay matches preview
+            gridOverlay.topAnchor.constraint(equalTo: previewView.topAnchor),
+            gridOverlay.leadingAnchor.constraint(equalTo: previewView.leadingAnchor),
+            gridOverlay.trailingAnchor.constraint(equalTo: previewView.trailingAnchor),
+            gridOverlay.bottomAnchor.constraint(equalTo: previewView.bottomAnchor),
+            
             // Top controls
             topControlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             topControlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
