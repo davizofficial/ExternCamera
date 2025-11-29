@@ -69,7 +69,7 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     
     private func saveToFileSystem(imageData: Data) {
         let directory = storageManager.getSaveDirectory(forExternal: toExternal)
-        let filename = "IMG_\(Date().formattedForFilename()).jpg"
+        let filename = "IMG_\(Date().toString()).jpg"
         let fileURL = directory.appendingPathComponent(filename)
         
         do {
