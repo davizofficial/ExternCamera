@@ -3,6 +3,7 @@ import AVFoundation
 class CameraManager: NSObject {
     private let session = AVCaptureSession()
     private var videoDeviceInput: AVCaptureDeviceInput!
+    private var audioDeviceInput: AVCaptureDeviceInput?
     private let photoOutput = AVCapturePhotoOutput()
     private let videoOutput = AVCaptureMovieFileOutput()
     private var photoCaptureDelegate: PhotoCaptureDelegate?
@@ -20,15 +21,33 @@ class CameraManager: NSObject {
     func prepare(completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: .background).async { [self] in
             do {
-                let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)!
-                let input = try AVCaptureDeviceInput(device: device)
+                // Setup video input
+                let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)!
+                let videoInput = try AVCaptureDeviceInput(device: videoDevice)
                 
                 session.beginConfiguration()
-                if session.canAddInput(input) {
-                    session.addInput(input)
-                    videoDeviceInput = input
+                
+                // Add video input
+                if session.canAddInput(videoInput) {
+                    session.addInput(videoInput)
+                    videoDeviceInput = videoInput
                 }
                 
+                // Add audio input for video recording
+                if let audioDevice = AVCaptureDevice.default(for: .audio) {
+                    do {
+                        let audioInput = try AVCaptureDeviceInput(device: audioDevice)
+                        if session.canAddInput(audioInput) {
+                            session.addInput(audioInput)
+                            audioDeviceInput = audioInput
+                            print("✅ Audio input added successfully")
+                        }
+                    } catch {
+                        print("⚠️ Could not add audio input: \(error)")
+                    }
+                }
+                
+                // Add photo output
                 if session.canAddOutput(photoOutput) {
                     session.addOutput(photoOutput)
                 }
@@ -39,7 +58,7 @@ class CameraManager: NSObject {
                     completion(true)
                 }
             } catch {
-                print("Error: \(error)")
+                print("❌ Camera setup error: \(error)")
                 DispatchQueue.main.async {
                     completion(false)
                 }
