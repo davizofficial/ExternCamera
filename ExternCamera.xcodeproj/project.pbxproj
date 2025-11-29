@@ -1,0 +1,460 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000001 /* AppDelegate.swift */; };
+		A10000002 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000002 /* SceneDelegate.swift */; };
+		A10000004 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000004 /* CameraManager.swift */; };
+		A10000005 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000005 /* StorageManager.swift */; };
+		A10000006 /* PhotoCaptureDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000006 /* PhotoCaptureDelegate.swift */; };
+		A10000007 /* VideoCaptureDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000007 /* VideoCaptureDelegate.swift */; };
+		A10000008 /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000008 /* Date+Extensions.swift */; };
+		A10000009 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000009 /* CameraPreviewView.swift */; };
+		A10000010 /* CaptureButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010 /* CaptureButton.swift */; };
+		A10000011 /* FlashButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000011 /* FlashButton.swift */; };
+		A10000012 /* GridOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000012 /* GridOverlayView.swift */; };
+		A10000013 /* TimerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000013 /* TimerButton.swift */; };
+		A10000014 /* ToggleCameraButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000014 /* ToggleCameraButton.swift */; };
+		A10000015 /* ZoomSliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000015 /* ZoomSliderView.swift */; };
+		A10000016 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A30000001 /* Assets.xcassets */; };
+		A10000017 /* MainCameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000016 /* MainCameraViewController.swift */; };
+		A10000018 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000017 /* SettingsViewController.swift */; };
+		A10000019 /* StorageSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000018 /* StorageSelectionViewController.swift */; };
+		A10000020 /* CameraMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000019 /* CameraMode.swift */; };
+		A10000021 /* CameraSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020 /* CameraSettings.swift */; };
+		A10000022 /* ModeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000021 /* ModeSelectorView.swift */; };
+		A10000023 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000022 /* GalleryViewController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A00000001 /* ExternCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExternCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A20000002 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		A20000004 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
+		A20000005 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
+		A20000006 /* PhotoCaptureDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureDelegate.swift; sourceTree = "<group>"; };
+		A20000007 /* VideoCaptureDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCaptureDelegate.swift; sourceTree = "<group>"; };
+		A20000008 /* Date+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extensions.swift"; sourceTree = "<group>"; };
+		A20000009 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreviewView.swift; sourceTree = "<group>"; };
+		A20000010 /* CaptureButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureButton.swift; sourceTree = "<group>"; };
+		A20000011 /* FlashButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlashButton.swift; sourceTree = "<group>"; };
+		A20000012 /* GridOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridOverlayView.swift; sourceTree = "<group>"; };
+		A20000013 /* TimerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerButton.swift; sourceTree = "<group>"; };
+		A20000014 /* ToggleCameraButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToggleCameraButton.swift; sourceTree = "<group>"; };
+		A20000015 /* ZoomSliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomSliderView.swift; sourceTree = "<group>"; };
+		A20000016 /* MainCameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainCameraViewController.swift; sourceTree = "<group>"; };
+		A20000017 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		A20000018 /* StorageSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageSelectionViewController.swift; sourceTree = "<group>"; };
+		A20000019 /* CameraMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraMode.swift; sourceTree = "<group>"; };
+		A20000020 /* CameraSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSettings.swift; sourceTree = "<group>"; };
+		A20000021 /* ModeSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeSelectorView.swift; sourceTree = "<group>"; };
+		A20000022 /* GalleryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewController.swift; sourceTree = "<group>"; };
+		A30000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A40000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A50000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A60000001 = {
+			isa = PBXGroup;
+			children = (
+				A60000002 /* ExternCamera */,
+				A60000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A60000002 /* ExternCamera */ = {
+			isa = PBXGroup;
+			children = (
+				A20000001 /* AppDelegate.swift */,
+				A20000002 /* SceneDelegate.swift */,
+				A60000006 /* ViewControllers */,
+				A60000007 /* Models */,
+				A20000004 /* CameraManager.swift */,
+				A20000005 /* StorageManager.swift */,
+				A20000006 /* PhotoCaptureDelegate.swift */,
+				A20000007 /* VideoCaptureDelegate.swift */,
+				A60000004 /* Helpers */,
+				A60000005 /* UI */,
+				A30000001 /* Assets.xcassets */,
+				A40000001 /* Info.plist */,
+			);
+			name = ExternCamera;
+			path = ExternCamera;
+			sourceTree = "<group>";
+		};
+		A60000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000001 /* ExternCamera.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A60000004 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				A20000008 /* Date+Extensions.swift */,
+			);
+			name = Helpers;
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		A60000005 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				A20000009 /* CameraPreviewView.swift */,
+				A20000010 /* CaptureButton.swift */,
+				A20000011 /* FlashButton.swift */,
+				A20000012 /* GridOverlayView.swift */,
+				A20000013 /* TimerButton.swift */,
+				A20000014 /* ToggleCameraButton.swift */,
+				A20000015 /* ZoomSliderView.swift */,
+				A20000021 /* ModeSelectorView.swift */,
+			);
+			name = UI;
+			path = UI;
+			sourceTree = "<group>";
+		};
+		A60000006 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				A20000016 /* MainCameraViewController.swift */,
+				A20000017 /* SettingsViewController.swift */,
+				A20000018 /* StorageSelectionViewController.swift */,
+				A20000022 /* GalleryViewController.swift */,
+			);
+			name = ViewControllers;
+			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		A60000007 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A20000019 /* CameraMode.swift */,
+				A20000020 /* CameraSettings.swift */,
+			);
+			name = Models;
+			path = Models;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A70000001 /* ExternCamera */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A80000001 /* Build configuration list for PBXNativeTarget "ExternCamera" */;
+			buildPhases = (
+				A90000001 /* Sources */,
+				A50000001 /* Frameworks */,
+				AA0000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ExternCamera;
+			productName = ExternCamera;
+			productReference = A00000001 /* ExternCamera.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AB0000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					A70000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = AC0000001 /* Build configuration list for PBXProject "ExternCamera" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A60000001;
+			productRefGroup = A60000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A70000001 /* ExternCamera */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000016 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A90000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000001 /* AppDelegate.swift in Sources */,
+				A10000002 /* SceneDelegate.swift in Sources */,
+				A10000004 /* CameraManager.swift in Sources */,
+				A10000005 /* StorageManager.swift in Sources */,
+				A10000006 /* PhotoCaptureDelegate.swift in Sources */,
+				A10000007 /* VideoCaptureDelegate.swift in Sources */,
+				A10000008 /* Date+Extensions.swift in Sources */,
+				A10000009 /* CameraPreviewView.swift in Sources */,
+				A10000010 /* CaptureButton.swift in Sources */,
+				A10000011 /* FlashButton.swift in Sources */,
+				A10000012 /* GridOverlayView.swift in Sources */,
+				A10000013 /* TimerButton.swift in Sources */,
+				A10000014 /* ToggleCameraButton.swift in Sources */,
+				A10000015 /* ZoomSliderView.swift in Sources */,
+				A10000017 /* MainCameraViewController.swift in Sources */,
+				A10000018 /* SettingsViewController.swift in Sources */,
+				A10000019 /* StorageSelectionViewController.swift in Sources */,
+				A10000020 /* CameraMode.swift in Sources */,
+				A10000021 /* CameraSettings.swift in Sources */,
+				A10000022 /* ModeSelectorView.swift in Sources */,
+				A10000023 /* GalleryViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AD0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AD0000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AE0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ExternCamera/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk mengambil foto dan video";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Aplikasi membutuhkan akses mikrofon untuk merekam video dengan audio";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.externcamera.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AE0000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ExternCamera/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Aplikasi membutuhkan akses kamera untuk mengambil foto dan video";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Aplikasi membutuhkan akses mikrofon untuk merekam video dengan audio";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.externcamera.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AC0000001 /* Build configuration list for PBXProject "ExternCamera" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD0000001 /* Debug */,
+				AD0000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A80000001 /* Build configuration list for PBXNativeTarget "ExternCamera" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AE0000001 /* Debug */,
+				AE0000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AB0000001 /* Project object */;
+}
