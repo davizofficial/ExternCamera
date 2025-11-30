@@ -83,7 +83,25 @@ class CameraManager: NSObject {
         }
         
         // Retain delegate to prevent deallocation
-        photoCaptureDelegate = PhotoCaptureDelegate(toExternal: toExternal) { [weak self] success, url in
+        photoCaptureDelegate = PhotoCaptureDelegate(toExternal: toExternal, isSquare: false) { [weak self] success, url in
+            completion(success, url)
+            // Release delegate after completion
+            self?.photoCaptureDelegate = nil
+        }
+        
+        photoOutput.capturePhoto(with: settings, delegate: photoCaptureDelegate!)
+    }
+    
+    func captureSquarePhoto(toExternal: Bool, completion: @escaping (Bool, URL?) -> Void) {
+        let settings = AVCapturePhotoSettings()
+        
+        // Set flash mode
+        if photoOutput.supportedFlashModes.contains(currentFlashMode) {
+            settings.flashMode = currentFlashMode
+        }
+        
+        // Retain delegate to prevent deallocation - dengan flag isSquare = true
+        photoCaptureDelegate = PhotoCaptureDelegate(toExternal: toExternal, isSquare: true) { [weak self] success, url in
             completion(success, url)
             // Release delegate after completion
             self?.photoCaptureDelegate = nil

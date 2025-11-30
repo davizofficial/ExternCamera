@@ -4,11 +4,13 @@ import UIKit
 
 class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     private let toExternal: Bool
+    private let isSquare: Bool
     private let completion: (Bool, URL?) -> Void
     private let storageManager = StorageManager.shared
     
-    init(toExternal: Bool, completion: @escaping (Bool, URL?) -> Void) {
+    init(toExternal: Bool, isSquare: Bool = false, completion: @escaping (Bool, URL?) -> Void) {
         self.toExternal = toExternal
+        self.isSquare = isSquare
         self.completion = completion
     }
     
@@ -20,10 +22,15 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
         }
         
         guard let imageData = photo.fileDataRepresentation(),
-              let image = UIImage(data: imageData) else {
+              var image = UIImage(data: imageData) else {
             print("❌ Failed to get image data")
             completion(false, nil)
             return
+        }
+        
+        // Crop to square if needed
+        if isSquare {
+            image = cropToSquare(image: image)
         }
         
         // Save to Photos Library (galeri iPhone)
@@ -45,13 +52,16 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
             }
             
             // Also save to file system
-            self.saveToFileSystem(imageData: imageData)
+            if let croppedData = image.jpegData(compressionQuality: 0.95) {
+                self.saveToFileSystem(imageData: croppedData)
+            }
         }
     }
     
     private func saveToFileSystem(imageData: Data) {
         let directory = storageManager.getSaveDirectory(forExternal: toExternal)
-        let filename = "IMG_\(Date().toString()).jpg"
+        let prefix = isSquare ? "SQ_" : "IMG_"
+        let filename = "\(prefix)\(Date().toString()).jpg"
         let fileURL = directory.appendingPathComponent(filename)
         
         do {
@@ -66,5 +76,25 @@ class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
                 self.completion(false, nil)
             }
         }
+    }
+    
+    private func cropToSquare(image: UIImage) -> UIImage {
+        let originalWidth = image.size.width
+        let originalHeight = image.size.height
+        
+        // Use the smaller dimension as the square size
+        let squareSize = min(originalWidth, originalHeight)
+        
+        // Calculate crop rect (center crop)
+        let x = (originalWidth - squareSize) / 2
+        let y = (originalHeight - squareSize) / 2
+        let cropRect = CGRect(x: x, y: y, width: squareSize, height: squareSize)
+        
+        // Crop the image
+        guard let cgImage = image.cgImage?.cropping(to: cropRect) else {
+            return image
+        }
+        
+        return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
     }
 }

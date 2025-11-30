@@ -36,8 +36,13 @@ class MainCameraViewController: UIViewController {
     // Overlays
     private let gridOverlay = GridOverlayView()
     private let focusGuideView = UIView()
+    private let squareFrameOverlay = SquareFrameOverlay()
     private let recordingLabel = UILabel()
     private let zoomSlider = UISlider()
+    
+    // Panorama
+    private var panoramaImages: [UIImage] = []
+    private var isPanoramaMode = false
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -79,6 +84,10 @@ class MainCameraViewController: UIViewController {
         // Grid overlay
         view.addSubview(gridOverlay)
         gridOverlay.isHidden = !settings.showGrid
+        
+        // Square overlay (untuk mode square)
+        view.addSubview(squareFrameOverlay)
+        squareFrameOverlay.isHidden = true
         
         // Focus guide (kotak kuning di tengah seperti di gambar)
         setupFocusGuide()
@@ -223,6 +232,12 @@ class MainCameraViewController: UIViewController {
             gridOverlay.trailingAnchor.constraint(equalTo: previewView.trailingAnchor),
             gridOverlay.bottomAnchor.constraint(equalTo: previewView.bottomAnchor),
             
+            // Square frame overlay matches preview
+            squareFrameOverlay.topAnchor.constraint(equalTo: previewView.topAnchor),
+            squareFrameOverlay.leadingAnchor.constraint(equalTo: previewView.leadingAnchor),
+            squareFrameOverlay.trailingAnchor.constraint(equalTo: previewView.trailingAnchor),
+            squareFrameOverlay.bottomAnchor.constraint(equalTo: previewView.bottomAnchor),
+            
             // Top controls
             topControlsView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             topControlsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -341,12 +356,14 @@ class MainCameraViewController: UIViewController {
     // MARK: - Actions
     @objc private func didTapCapture() {
         switch currentMode {
-        case .photo, .square:
+        case .photo:
             capturePhoto()
+        case .square:
+            captureSquarePhoto()
         case .video:
             toggleVideoRecording()
         case .pano:
-            showAlert(title: "Panorama", message: "Fitur panorama belum tersedia")
+            capturePanorama()
         }
     }
     
@@ -369,6 +386,161 @@ class MainCameraViewController: UIViewController {
             } else {
                 self?.showAlert(title: "Error", message: "Gagal menyimpan foto")
             }
+        }
+    }
+    
+    private func captureSquarePhoto() {
+        let useExternal = (selectedStorageType == .external)
+        
+        if useExternal && !storageManager.isExternalStorageAvailable() {
+            showAlert(title: "Storage Error", message: "External storage not available. Please reconnect USB drive or select internal storage.")
+            return
+        }
+        
+        // Capture photo biasa, tapi akan di-crop menjadi square di PhotoCaptureDelegate
+        cameraManager.captureSquarePhoto(toExternal: useExternal) { [weak self] success, url in
+            if success {
+                let storageName = useExternal ? "External USB" : "Internal"
+                print("✅ Square foto disimpan ke \(storageName): \(url?.path ?? "")")
+                self?.updateThumbnail()
+                self?.showSaveConfirmation(path: url?.path ?? "")
+            } else {
+                self?.showAlert(title: "Error", message: "Gagal menyimpan square foto")
+            }
+        }
+    }
+    
+    private func capturePanorama() {
+        if !isPanoramaMode {
+            // Start panorama mode
+            isPanoramaMode = true
+            panoramaImages = []
+            showPanoramaInstructions()
+            
+            // Change capture button appearance
+            captureButton.setTitle("Capture Frame", for: .normal)
+            captureButton.backgroundColor = .systemGreen
+        } else {
+            // Capture current frame
+            capturePanoramaFrame()
+        }
+    }
+    
+    private func showPanoramaInstructions() {
+        let alert = UIAlertController(
+            title: "Panorama Mode",
+            message: "Tap the capture button to take multiple photos. Move camera slowly between shots. Tap 'Done' when finished.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Start", style: .default))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+            self?.cancelPanorama()
+        })
+        present(alert, animated: true)
+    }
+    
+    private func capturePanoramaFrame() {
+        let useExternal = (selectedStorageType == .external)
+        
+        cameraManager.capturePhoto(toExternal: false) { [weak self] success, url in
+            guard let self = self, success, let url = url else { return }
+            
+            // Load captured image
+            if let image = UIImage(contentsOfFile: url.path) {
+                self.panoramaImages.append(image)
+                
+                // Show progress
+                let count = self.panoramaImages.count
+                self.showAlert(title: "Frame \(count) Captured", message: "Captured \(count) frame(s). Move camera and tap again, or tap 'Done'.")
+                
+                // After 3+ frames, offer to finish
+                if count >= 3 {
+                    self.offerToFinishPanorama()
+                }
+            }
+        }
+    }
+    
+    private func offerToFinishPanorama() {
+        let alert = UIAlertController(
+            title: "Panorama Progress",
+            message: "You have captured \(panoramaImages.count) frames. Continue or finish?",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Continue", style: .default))
+        alert.addAction(UIAlertAction(title: "Finish", style: .default) { [weak self] _ in
+            self?.finishPanorama()
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
+            self?.cancelPanorama()
+        })
+        present(alert, animated: true)
+    }
+    
+    private func finishPanorama() {
+        guard panoramaImages.count >= 2 else {
+            showAlert(title: "Error", message: "Need at least 2 frames for panorama")
+            return
+        }
+        
+        // Stitch images horizontally
+        let stitchedImage = stitchPanoramaImages(panoramaImages)
+        
+        // Save stitched panorama
+        let useExternal = (selectedStorageType == .external)
+        savePanoramaImage(stitchedImage, toExternal: useExternal)
+        
+        // Reset panorama mode
+        isPanoramaMode = false
+        panoramaImages = []
+        captureButton.setTitle(nil, for: .normal)
+        captureButton.backgroundColor = .clear
+        
+        showAlert(title: "Success", message: "Panorama saved!")
+    }
+    
+    private func cancelPanorama() {
+        isPanoramaMode = false
+        panoramaImages = []
+        captureButton.setTitle(nil, for: .normal)
+        captureButton.backgroundColor = .clear
+    }
+    
+    private func stitchPanoramaImages(_ images: [UIImage]) -> UIImage {
+        // Simple horizontal stitching
+        let totalWidth = images.reduce(0) { $0 + $1.size.width }
+        let maxHeight = images.map { $0.size.height }.max() ?? 0
+        
+        let size = CGSize(width: totalWidth, height: maxHeight)
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        
+        var xOffset: CGFloat = 0
+        for image in images {
+            image.draw(at: CGPoint(x: xOffset, y: 0))
+            xOffset += image.size.width
+        }
+        
+        let stitchedImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
+        UIGraphicsEndImageContext()
+        
+        return stitchedImage
+    }
+    
+    private func savePanoramaImage(_ image: UIImage, toExternal: Bool) {
+        guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
+        
+        let directory = storageManager.getSaveDirectory(forExternal: toExternal)
+        let filename = "PANO_\(Date().toString()).jpg"
+        let fileURL = directory.appendingPathComponent(filename)
+        
+        do {
+            try imageData.write(to: fileURL)
+            print("✅ Panorama saved: \(fileURL.path)")
+            updateThumbnail()
+            showSaveConfirmation(path: fileURL.path)
+        } catch {
+            print("❌ Failed to save panorama: \(error)")
+            showAlert(title: "Error", message: "Failed to save panorama")
         }
     }
     
@@ -518,22 +690,30 @@ class MainCameraViewController: UIViewController {
     private func updateUIForMode() {
         captureButton.mode = currentMode
         
+        // Show/hide square frame overlay
+        squareFrameOverlay.isHidden = (currentMode != .square)
+        
         switch currentMode {
         case .video:
             flashButton.isHidden = false
             hdrButton.isHidden = true
             livePhotoButton.isHidden = true
             timerButton.isHidden = true
-        case .photo, .square:
+        case .photo:
             flashButton.isHidden = false
             hdrButton.isHidden = false
             livePhotoButton.isHidden = false
+            timerButton.isHidden = false
+        case .square:
+            flashButton.isHidden = false
+            hdrButton.isHidden = false
+            livePhotoButton.isHidden = true
             timerButton.isHidden = false
         case .pano:
             flashButton.isHidden = true
             hdrButton.isHidden = true
             livePhotoButton.isHidden = true
-            timerButton.isHidden = true
+            timerButton.isHidden = false
         }
         
         // Update button states
