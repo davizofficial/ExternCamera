@@ -150,8 +150,7 @@ extension SettingsViewController: UITableViewDataSource {
         case .video:
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             cell.textLabel?.text = "Record Video"
-            let resolution = settings.videoResolution
-            cell.detailTextLabel?.text = resolution.displayName
+            cell.detailTextLabel?.text = "1080p at 30 fps"
             cell.accessoryType = .disclosureIndicator
             return cell
             
@@ -221,28 +220,14 @@ extension SettingsViewController: UITableViewDelegate {
     }
     
     private func showVideoResolutionSelection() {
-        let cameraManager = CameraManager()
-        let availableResolutions = cameraManager.getSupportedResolutions()
-        let currentResolution = settings.videoResolution
-        
-        let resolutionVC = VideoResolutionViewController(
-            currentResolution: currentResolution,
-            availableResolutions: availableResolutions
+        // Temporarily disabled - will be implemented in next update
+        let alert = UIAlertController(
+            title: "Video Resolution",
+            message: "Video resolution settings will be available in the next update. Currently recording at 1080p 30fps.",
+            preferredStyle: .alert
         )
-        
-        resolutionVC.onSelect = { [weak self] resolution in
-            self?.tableView.reloadData()
-            
-            // Show success animation
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
-        }
-        
-        let navController = UINavigationController(rootViewController: resolutionVC)
-        navController.modalPresentationStyle = .pageSheet
-        
-        // Animate presentation
-        present(navController, animated: true)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
 

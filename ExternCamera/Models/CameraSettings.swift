@@ -13,9 +13,7 @@ class CameraSettings {
     private let saveToExternalKey = "saveToExternal"
     private let flashModeKey = "flashMode"
     private let timerModeKey = "timerMode"
-    private let videoResolutionWidthKey = "videoResolutionWidth"
-    private let videoResolutionHeightKey = "videoResolutionHeight"
-    private let videoResolutionFpsKey = "videoResolutionFps"
+
     
     var showGrid: Bool {
         get { defaults.bool(forKey: gridKey) }
@@ -53,34 +51,7 @@ class CameraSettings {
         set { defaults.set(newValue.rawValue, forKey: timerModeKey) }
     }
     
-    var videoResolution: VideoResolution {
-        get {
-            let width = defaults.integer(forKey: videoResolutionWidthKey)
-            let height = defaults.integer(forKey: videoResolutionHeightKey)
-            let fps = defaults.integer(forKey: videoResolutionFpsKey)
-            
-            if width == 0 {
-                // Default: 1080p at 30 fps
-                return VideoResolution.available1080p30
-            }
-            
-            let preset: AVCaptureSession.Preset
-            if width >= 3840 {
-                preset = .hd4K3840x2160
-            } else if width >= 1920 {
-                preset = .hd1920x1080
-            } else {
-                preset = .hd1280x720
-            }
-            
-            return VideoResolution(width: width, height: height, fps: fps, preset: preset)
-        }
-        set {
-            defaults.set(newValue.width, forKey: videoResolutionWidthKey)
-            defaults.set(newValue.height, forKey: videoResolutionHeightKey)
-            defaults.set(newValue.fps, forKey: videoResolutionFpsKey)
-        }
-    }
+
     
     private init() {}
 }
