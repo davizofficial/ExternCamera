@@ -53,37 +53,99 @@ class StorageManager {
         ))
         print("✅ Internal: \(internalURL.path)")
         
-        // 2. SCAN /Volumes (untuk USB, SD Card yang di-mount iOS)
-        let volumesPath = URL(fileURLWithPath: "/Volumes")
-        if let volumes = try? fm.contentsOfDirectory(
-            at: volumesPath,
-            includingPropertiesForKeys: [.volumeNameKey, .volumeIsRemovableKey, .volumeIsLocalKey],
-            options: [.skipsHiddenFiles]
-        ) {
-            print("\n📂 Scanning /Volumes...")
-            for volume in volumes {
-                let volumeName = volume.lastPathComponent
-                let isWritable = testWriteAccess(at: volume)
-                let space = getStorageSpace(at: volume)
-                
-                print("  📍 Found: \(volumeName) at \(volume.path)")
-                print("     Writable: \(isWritable)")
-                
-                if isWritable {
-                    foundStorages.append(StorageInfo(
-                        type: .external,
-                        name: volumeName,
-                        path: volume.path,
-                        url: volume,
-                        isAvailable: true,
-                        isWritable: true,
-                        freeSpace: space?.free,
-                        totalSpace: space?.total
-                    ))
+        // 1.5. SCAN MOUNTED VOLUMES MENGGUNAKAN FileManager.mountedVolumeURLs
+        print("\n📂 Scanning mounted volumes...")
+        if let mountedVolumes = fm.mountedVolumeURLs(includingResourceValuesForKeys: [
+            .volumeNameKey,
+            .volumeIsRemovableKey,
+            .volumeIsEjectableKey,
+            .volumeIsLocalKey
+        ], options: []) {
+            for volume in mountedVolumes {
+                do {
+                    let resourceValues = try volume.resourceValues(forKeys: [
+                        .volumeNameKey,
+                        .volumeIsRemovableKey,
+                        .volumeIsEjectableKey,
+                        .volumeIsLocalKey
+                    ])
                     
-                    // Set sebagai external storage pertama yang ditemukan
-                    if selectedExternalURL == nil {
-                        selectedExternalURL = volume
+                    let volumeName = resourceValues.volumeName ?? volume.lastPathComponent
+                    let isRemovable = resourceValues.volumeIsRemovable ?? false
+                    let isEjectable = resourceValues.volumeIsEjectable ?? false
+                    
+                    print("  📍 Volume: \(volumeName)")
+                    print("     Path: \(volume.path)")
+                    print("     Removable: \(isRemovable), Ejectable: \(isEjectable)")
+                    
+                    // Cek apakah ini external storage (removable atau ejectable)
+                    if isRemovable || isEjectable {
+                        let isWritable = testWriteAccess(at: volume)
+                        print("     Writable: \(isWritable)")
+                        
+                        if isWritable {
+                            let space = getStorageSpace(at: volume)
+                            foundStorages.append(StorageInfo(
+                                type: .external,
+                                name: volumeName,
+                                path: volume.path,
+                                url: volume,
+                                isAvailable: true,
+                                isWritable: true,
+                                freeSpace: space?.free,
+                                totalSpace: space?.total
+                            ))
+                            
+                            if selectedExternalURL == nil {
+                                selectedExternalURL = volume
+                                print("     ✅ Set as default external storage")
+                            }
+                        }
+                    }
+                } catch {
+                    print("  ⚠️ Error reading volume properties: \(error)")
+                }
+            }
+        }
+        
+        // 2. SCAN /Volumes (untuk USB, SD Card yang di-mount iOS)
+        let volumesPaths = [
+            "/Volumes",
+            "/private/var/mobile/Library/LiveFiles/com.apple.filesystems.userfsd"
+        ]
+        
+        for volumesPathString in volumesPaths {
+            let volumesPath = URL(fileURLWithPath: volumesPathString)
+            if let volumes = try? fm.contentsOfDirectory(
+                at: volumesPath,
+                includingPropertiesForKeys: [.volumeNameKey, .volumeIsRemovableKey, .volumeIsLocalKey],
+                options: [.skipsHiddenFiles]
+            ) {
+                print("\n📂 Scanning \(volumesPathString)...")
+                for volume in volumes {
+                    let volumeName = volume.lastPathComponent
+                    let isWritable = testWriteAccess(at: volume)
+                    let space = getStorageSpace(at: volume)
+                    
+                    print("  📍 Found: \(volumeName) at \(volume.path)")
+                    print("     Writable: \(isWritable)")
+                    
+                    if isWritable {
+                        foundStorages.append(StorageInfo(
+                            type: .external,
+                            name: volumeName,
+                            path: volume.path,
+                            url: volume,
+                            isAvailable: true,
+                            isWritable: true,
+                            freeSpace: space?.free,
+                            totalSpace: space?.total
+                        ))
+                        
+                        // Set sebagai external storage pertama yang ditemukan
+                        if selectedExternalURL == nil {
+                            selectedExternalURL = volume
+                        }
                     }
                 }
             }
@@ -263,6 +325,46 @@ class StorageManager {
     // Refresh scan untuk external storage
     func refreshExternalStorage() {
         scanAllStorages()
+    }
+    
+    // Debug function untuk print semua path yang dicoba
+    func debugPrintAllPaths() {
+        print("\n🔍 === DEBUG: ALL ATTEMPTED PATHS ===")
+        
+        let fm = FileManager.default
+        
+        // Print mounted volumes
+        if let volumes = fm.mountedVolumeURLs(includingResourceValuesForKeys: nil, options: []) {
+            print("\n📂 Mounted Volumes:")
+            for volume in volumes {
+                print("  - \(volume.path)")
+            }
+        }
+        
+        // Print common paths
+        let pathsToCheck = [
+            "/Volumes",
+            "/private/var/mobile/Library/LiveFiles",
+            "/private/var/mobile/Library/LiveFiles/com.apple.filesystems.userfsd",
+            "/private/var/mobile/Media",
+            "/var/mobile/Media"
+        ]
+        
+        print("\n📂 Checking common paths:")
+        for path in pathsToCheck {
+            let exists = fm.fileExists(atPath: path)
+            print("  - \(path): \(exists ? "✅ EXISTS" : "❌ NOT FOUND")")
+            
+            if exists {
+                if let contents = try? fm.contentsOfDirectory(atPath: path) {
+                    for item in contents {
+                        print("    └─ \(item)")
+                    }
+                }
+            }
+        }
+        
+        print("\n=================================\n")
     }
     
     func getStorageSpace(for type: StorageType) -> (total: Int64, free: Int64)? {
