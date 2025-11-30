@@ -1,4 +1,5 @@
 import UIKit
+import UniformTypeIdentifiers
 
 class SettingsViewController: UIViewController {
     
@@ -14,6 +15,7 @@ class SettingsViewController: UIViewController {
         case camera
         case photo
         case video
+        case debug
         case about
     }
     
@@ -71,6 +73,7 @@ extension SettingsViewController: UITableViewDataSource {
         case .camera: return 2
         case .photo: return 2
         case .video: return 1
+        case .debug: return 3
         case .about: return 2
         }
     }
@@ -176,6 +179,25 @@ extension SettingsViewController: UITableViewDataSource {
             cell.accessoryType = .disclosureIndicator
             return cell
             
+        case .debug:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+            
+            if indexPath.row == 0 {
+                cell.textLabel?.text = "� DBrowse & Select Flashdisk"
+                cell.textLabel?.textColor = .systemGreen
+                cell.accessoryType = .disclosureIndicator
+            } else if indexPath.row == 1 {
+                cell.textLabel?.text = "� Deebug All Paths"
+                cell.textLabel?.textColor = .systemBlue
+                cell.accessoryType = .disclosureIndicator
+            } else {
+                cell.textLabel?.text = "🔄 Refresh Storage Scan"
+                cell.textLabel?.textColor = .systemOrange
+                cell.accessoryType = .disclosureIndicator
+            }
+            
+            return cell
+            
         case .about:
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             cell.selectionStyle = .none
@@ -203,6 +225,7 @@ extension SettingsViewController: UITableViewDataSource {
         case .camera: return "Camera"
         case .photo: return "Photo"
         case .video: return "Video"
+        case .debug: return "Debug Tools"
         case .about: return "About"
         }
     }
@@ -215,6 +238,8 @@ extension SettingsViewController: UITableViewDataSource {
             return "All detected storages are listed above. Green = writable, Red = read-only. Connect USB/SD card via Lightning adapter for external storage."
         case .photo:
             return "HDR blends the best parts of separate exposures into a single photo. Live Photo captures 1.5 seconds of motion."
+        case .debug:
+            return "Debug tools untuk melihat semua path yang dicoba dan refresh storage detection. Check Xcode console untuk output detail."
         default:
             return nil
         }
@@ -269,6 +294,35 @@ extension SettingsViewController: UITableViewDelegate {
                     present(alert, animated: true)
                 }
             }
+        } else if section == .debug {
+            if indexPath.row == 0 {
+                // Browse and select flashdisk
+                showDocumentPicker()
+            } else if indexPath.row == 1 {
+                // Debug all paths
+                storageManager.debugPrintAllPaths()
+                
+                let alert = UIAlertController(
+                    title: "Debug Output",
+                    message: "Check Xcode console untuk melihat semua path yang dicoba. Buka Window → Devices and Simulators → View Device Logs.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                present(alert, animated: true)
+            } else {
+                // Refresh storage scan
+                storageManager.refreshExternalStorage()
+                tableView.reloadData()
+                
+                let storages = storageManager.getAvailableStorages()
+                let alert = UIAlertController(
+                    title: "Storage Refreshed",
+                    message: "Found \(storages.count) storage(s). Check console for details.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                present(alert, animated: true)
+            }
         } else if section == .video && indexPath.row == 0 {
             showVideoResolutionSelection()
         }
@@ -291,6 +345,61 @@ extension SettingsViewController: UITableViewDelegate {
         )
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    private func showDocumentPicker() {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
+        picker.delegate = self
+        picker.allowsMultipleSelection = false
+        picker.shouldShowFileExtensions = true
+        
+        // Show instruction alert first
+        let alert = UIAlertController(
+            title: "Select Flashdisk Folder",
+            message: "1. Pastikan flashdisk sudah terhubung\n2. Buka Files app dan pastikan flashdisk terlihat\n3. Di picker, navigate ke 'Locations' → pilih flashdisk Anda\n4. Pilih folder root flashdisk atau buat folder 'ExternCamera'",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Continue", style: .default) { [weak self] _ in
+            self?.present(picker, animated: true)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
+}
+
+// MARK: - UIDocumentPickerDelegate
+extension SettingsViewController: UIDocumentPickerDelegate {
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let selectedURL = urls.first else { return }
+        
+        print("📁 User selected: \(selectedURL.path)")
+        
+        // Try to set as external storage
+        if storageManager.setExternalStorageFromBookmark(url: selectedURL) {
+            currentStorageType = .external
+            onStorageChange?(.external)
+            tableView.reloadData()
+            
+            let alert = UIAlertController(
+                title: "✅ Flashdisk Connected",
+                message: "Path: \(selectedURL.lastPathComponent)\n\nPhotos and videos will now be saved to this location.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        } else {
+            let alert = UIAlertController(
+                title: "❌ Cannot Access Location",
+                message: "The selected location is not writable. Please select a different folder or check flashdisk permissions.",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+    }
+    
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        print("📁 Document picker cancelled")
     }
 }
 
