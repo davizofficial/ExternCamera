@@ -64,7 +64,10 @@ extension SettingsViewController: UITableViewDataSource {
         guard let section = Section(rawValue: section) else { return 0 }
         
         switch section {
-        case .storage: return 3
+        case .storage:
+            // Tampilkan semua storage yang terdeteksi + 1 untuk current selection
+            let storages = storageManager.getAvailableStorages()
+            return storages.count + 1
         case .camera: return 2
         case .photo: return 2
         case .video: return 1
@@ -79,43 +82,48 @@ extension SettingsViewController: UITableViewDataSource {
         
         switch section {
         case .storage:
+            let storages = storageManager.getAvailableStorages()
+            
             if indexPath.row == 0 {
+                // Current selection
                 let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
                 cell.textLabel?.text = "Current Storage"
-                cell.detailTextLabel?.text = currentStorageType == .external ? "USB Drive" : "Internal"
+                cell.textLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+                cell.detailTextLabel?.text = currentStorageType == .external ? "External" : "Internal"
+                cell.detailTextLabel?.font = .systemFont(ofSize: 14, weight: .medium)
                 cell.accessoryType = .disclosureIndicator
                 return cell
-            } else if indexPath.row == 1 {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-                cell.textLabel?.text = "External Storage Status"
-                
-                // Refresh scan
-                storageManager.refreshExternalStorage()
-                let isConnected = storageManager.isExternalStorageAvailable()
-                
-                if isConnected {
-                    cell.detailTextLabel?.text = "Connected ✅"
-                    cell.detailTextLabel?.textColor = .systemGreen
-                } else {
-                    cell.detailTextLabel?.text = "Not Connected"
-                    cell.detailTextLabel?.textColor = .systemRed
-                }
-                cell.selectionStyle = .none
-                return cell
             } else {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-                cell.textLabel?.text = "External Path"
-                cell.textLabel?.font = .systemFont(ofSize: 14)
+                // List semua storage yang terdeteksi
+                let storageIndex = indexPath.row - 1
+                let storage = storages[storageIndex]
                 
-                if let url = storageManager.getUSBDriveURL() {
-                    cell.detailTextLabel?.text = url.lastPathComponent
-                    cell.detailTextLabel?.textColor = .systemGreen
+                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+                cell.textLabel?.text = storage.name
+                cell.textLabel?.font = .systemFont(ofSize: 15)
+                
+                // Format space info
+                var detailText = ""
+                if let free = storage.freeSpace, let total = storage.totalSpace {
+                    let freeGB = Double(free) / 1_000_000_000
+                    let totalGB = Double(total) / 1_000_000_000
+                    detailText = String(format: "%.1f GB / %.1f GB", freeGB, totalGB)
                 } else {
-                    cell.detailTextLabel?.text = "N/A"
-                    cell.detailTextLabel?.textColor = .systemGray
+                    detailText = storage.path
                 }
+                
+                cell.detailTextLabel?.text = detailText
                 cell.detailTextLabel?.font = .systemFont(ofSize: 12)
-                cell.selectionStyle = .none
+                
+                // Color coding
+                if storage.isWritable {
+                    cell.detailTextLabel?.textColor = .systemGreen
+                    cell.accessoryType = .checkmark
+                } else {
+                    cell.detailTextLabel?.textColor = .systemRed
+                    cell.accessoryType = .none
+                }
+                
                 return cell
             }
             
@@ -189,7 +197,9 @@ extension SettingsViewController: UITableViewDataSource {
         guard let section = Section(rawValue: section) else { return nil }
         
         switch section {
-        case .storage: return "Storage"
+        case .storage:
+            let count = storageManager.getAvailableStorages().count
+            return "Storage (\(count) detected)"
         case .camera: return "Camera"
         case .photo: return "Photo"
         case .video: return "Video"
@@ -202,7 +212,7 @@ extension SettingsViewController: UITableViewDataSource {
         
         switch section {
         case .storage:
-            return "Connect external storage (USB drive, SD card) via Lightning adapter. Storage will be auto-detected. If not detected, photos will be saved to internal storage."
+            return "All detected storages are listed above. Green = writable, Red = read-only. Connect USB/SD card via Lightning adapter for external storage."
         case .photo:
             return "HDR blends the best parts of separate exposures into a single photo. Live Photo captures 1.5 seconds of motion."
         default:
@@ -218,8 +228,47 @@ extension SettingsViewController: UITableViewDelegate {
         
         guard let section = Section(rawValue: indexPath.section) else { return }
         
-        if section == .storage && indexPath.row == 0 {
-            showStorageSelection()
+        if section == .storage {
+            if indexPath.row == 0 {
+                // Tap current storage - show selection
+                showStorageSelection()
+            } else {
+                // Tap specific storage - select it
+                let storages = storageManager.getAvailableStorages()
+                let storageIndex = indexPath.row - 1
+                let storage = storages[storageIndex]
+                
+                if storage.isWritable {
+                    // Set as selected storage
+                    if storage.type == .external {
+                        storageManager.setExternalStorage(url: storage.url)
+                        currentStorageType = .external
+                    } else {
+                        currentStorageType = .internal
+                    }
+                    
+                    onStorageChange?(currentStorageType)
+                    tableView.reloadData()
+                    
+                    // Show confirmation
+                    let alert = UIAlertController(
+                        title: "Storage Changed",
+                        message: "Photos and videos will now be saved to \(storage.name)",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    present(alert, animated: true)
+                } else {
+                    // Show error for read-only storage
+                    let alert = UIAlertController(
+                        title: "Cannot Use Storage",
+                        message: "\(storage.name) is read-only or not accessible.",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    present(alert, animated: true)
+                }
+            }
         } else if section == .video && indexPath.row == 0 {
             showVideoResolutionSelection()
         }
