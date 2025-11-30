@@ -208,20 +208,20 @@ extension CameraManager {
             return
         }
         
-        let filename = "VID_\(Date().toString()).mov"
-        let saveDirectory = StorageManager.shared.getSaveDirectory(forExternal: toExternal)
-        let url = saveDirectory.appendingPathComponent(filename)
+        // Use temp directory for initial recording
+        let filename = "VID_temp_\(Date().toString()).mov"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
         
-        print("🎥 Starting recording to: \(url.path)")
+        print("🎥 Starting recording to temp: \(tempURL.path)")
         
-        // Retain delegate to prevent deallocation
-        videoCaptureDelegate = VideoCaptureDelegate { [weak self] url, success in
+        // Retain delegate to prevent deallocation - pass toExternal parameter
+        videoCaptureDelegate = VideoCaptureDelegate(toExternal: toExternal) { [weak self] url, success in
             completion(url, success)
             // Release delegate after completion
             self?.videoCaptureDelegate = nil
         }
         
-        videoOutput.startRecording(to: url, recordingDelegate: videoCaptureDelegate!)
+        videoOutput.startRecording(to: tempURL, recordingDelegate: videoCaptureDelegate!)
     }
     
 

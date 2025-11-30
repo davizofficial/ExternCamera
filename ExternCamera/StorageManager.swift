@@ -268,6 +268,27 @@ class StorageManager {
     
     func getAvailableStorages() -> [StorageInfo] {
         scanAllStorages() // Refresh scan
+        
+        // Add bookmarked storage if exists and not already in list
+        if let bookmarkedURL = selectedExternalURL {
+            let alreadyExists = detectedStorages.contains { $0.url.path == bookmarkedURL.path }
+            
+            if !alreadyExists {
+                let space = getStorageSpace(at: bookmarkedURL)
+                let bookmarkedStorage = StorageInfo(
+                    type: .external,
+                    name: "📁 \(bookmarkedURL.lastPathComponent)",
+                    path: bookmarkedURL.path,
+                    url: bookmarkedURL,
+                    isAvailable: true,
+                    isWritable: testWriteAccess(at: bookmarkedURL),
+                    freeSpace: space?.free,
+                    totalSpace: space?.total
+                )
+                detectedStorages.insert(bookmarkedStorage, at: 1) // Insert after internal storage
+            }
+        }
+        
         return detectedStorages
     }
     

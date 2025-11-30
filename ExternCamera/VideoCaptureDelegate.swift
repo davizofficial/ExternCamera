@@ -1,10 +1,21 @@
 import AVFoundation
 import Photos
 
+extension Date {
+    func toString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd_HHmmss"
+        return formatter.string(from: self)
+    }
+}
+
 class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
     private let completion: (URL?, Bool) -> Void
+    private let toExternal: Bool
+    private let storageManager = StorageManager.shared
     
-    init(completion: @escaping (URL?, Bool) -> Void) {
+    init(toExternal: Bool, completion: @escaping (URL?, Bool) -> Void) {
+        self.toExternal = toExternal
         self.completion = completion
         super.init()
     }
@@ -32,6 +43,9 @@ class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
         
         print("🎥 Video recorded at: \(outputFileURL.path)")
         
+        // Copy to external/internal storage first
+        let finalURL = copyToStorage(from: outputFileURL)
+        
         // Save to Photos Library (galeri iPhone)
         PHPhotoLibrary.requestAuthorization { [weak self] status in
             guard let self = self else { return }
@@ -47,17 +61,34 @@ class VideoCaptureDelegate: NSObject, AVCaptureFileOutputRecordingDelegate {
                         print("❌ Failed to save video to Photos: \(error?.localizedDescription ?? "")")
                     }
                     
-                    // Report completion
+                    // Report completion with final storage URL
                     DispatchQueue.main.async {
-                        self.completion(outputFileURL, true)
+                        self.completion(finalURL, true)
                     }
                 }
             } else {
                 print("❌ Photo library access denied")
                 DispatchQueue.main.async {
-                    self.completion(outputFileURL, true)
+                    self.completion(finalURL, true)
                 }
             }
+        }
+    }
+    
+    private func copyToStorage(from tempURL: URL) -> URL {
+        let directory = storageManager.getSaveDirectory(forExternal: toExternal)
+        let filename = "VID_\(Date().toString()).mov"
+        let destinationURL = directory.appendingPathComponent(filename)
+        
+        do {
+            // Copy file to destination
+            try FileManager.default.copyItem(at: tempURL, to: destinationURL)
+            print("✅ Video copied to storage: \(destinationURL.path)")
+            return destinationURL
+        } catch {
+            print("❌ Failed to copy video to storage: \(error)")
+            print("   Falling back to temp URL")
+            return tempURL
         }
     }
 }

@@ -378,11 +378,26 @@ extension SettingsViewController: UIDocumentPickerDelegate {
         if storageManager.setExternalStorageFromBookmark(url: selectedURL) {
             currentStorageType = .external
             onStorageChange?(.external)
+            
+            // Refresh storage list to show the new storage
+            storageManager.refreshExternalStorage()
             tableView.reloadData()
+            
+            // Get storage info for display
+            let storages = storageManager.getAvailableStorages()
+            let selectedStorage = storages.first { $0.url.path == selectedURL.path }
+            
+            var message = "Path: \(selectedURL.lastPathComponent)\n\nPhotos and videos will now be saved to this location."
+            
+            if let storage = selectedStorage, let free = storage.freeSpace, let total = storage.totalSpace {
+                let freeGB = Double(free) / 1_000_000_000
+                let totalGB = Double(total) / 1_000_000_000
+                message += String(format: "\n\nAvailable: %.1f GB / %.1f GB", freeGB, totalGB)
+            }
             
             let alert = UIAlertController(
                 title: "✅ Flashdisk Connected",
-                message: "Path: \(selectedURL.lastPathComponent)\n\nPhotos and videos will now be saved to this location.",
+                message: message,
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: "OK", style: .default))
