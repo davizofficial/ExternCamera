@@ -87,20 +87,34 @@ extension SettingsViewController: UITableViewDataSource {
                 return cell
             } else if indexPath.row == 1 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-                cell.textLabel?.text = "USB Drive Status"
+                cell.textLabel?.text = "External Storage Status"
+                
+                // Refresh scan
+                storageManager.refreshExternalStorage()
                 let isConnected = storageManager.isExternalStorageAvailable()
-                cell.detailTextLabel?.text = isConnected ? "Connected ✅" : "Not Connected"
+                
+                if isConnected {
+                    cell.detailTextLabel?.text = "Connected ✅"
+                    cell.detailTextLabel?.textColor = .systemGreen
+                } else {
+                    cell.detailTextLabel?.text = "Not Connected"
+                    cell.detailTextLabel?.textColor = .systemRed
+                }
                 cell.selectionStyle = .none
                 return cell
             } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-                cell.textLabel?.text = "USB Path"
+                cell.textLabel?.text = "External Path"
+                cell.textLabel?.font = .systemFont(ofSize: 14)
+                
                 if let url = storageManager.getUSBDriveURL() {
-                    cell.detailTextLabel?.text = url.path
+                    cell.detailTextLabel?.text = url.lastPathComponent
+                    cell.detailTextLabel?.textColor = .systemGreen
                 } else {
-                    cell.detailTextLabel?.text = "Not Available"
+                    cell.detailTextLabel?.text = "N/A"
+                    cell.detailTextLabel?.textColor = .systemGray
                 }
-                cell.detailTextLabel?.font = .systemFont(ofSize: 11)
+                cell.detailTextLabel?.font = .systemFont(ofSize: 12)
                 cell.selectionStyle = .none
                 return cell
             }
@@ -188,7 +202,7 @@ extension SettingsViewController: UITableViewDataSource {
         
         switch section {
         case .storage:
-            return "Connect USB drive via Lightning Camera Connection Kit. USB must be formatted as FAT32."
+            return "Connect external storage (USB drive, SD card) via Lightning adapter. Storage will be auto-detected. If not detected, photos will be saved to internal storage."
         case .photo:
             return "HDR blends the best parts of separate exposures into a single photo. Live Photo captures 1.5 seconds of motion."
         default:

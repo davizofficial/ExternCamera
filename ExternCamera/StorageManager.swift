@@ -15,18 +15,61 @@ struct StorageInfo {
 class StorageManager {
     static let shared = StorageManager()
     
-    // Path untuk USB drive di jailbroken device
-    private let usbDrivePaths = [
-        "/private/var/mobile/Media/USBDRIVE",
-        "/var/mobile/Media/USBDRIVE",
-        "/private/var/mobile/Media/ExternalStorage",
-        "/var/mobile/Media/ExternalStorage"
-    ]
+    private var externalStorageURL: URL?
     
-    private init() {}
+    private init() {
+        // Scan untuk external storage saat init
+        scanForExternalStorage()
+    }
     
     var internalDocumentsURL: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    }
+    
+    // Scan untuk external storage (USB, SD Card, dll)
+    private func scanForExternalStorage() {
+        let fm = FileManager.default
+        
+        // Method 1: Cek mounted volumes
+        if let volumes = try? fm.contentsOfDirectory(at: URL(fileURLWithPath: "/Volumes"), 
+                                                      includingPropertiesForKeys: [.volumeNameKey, .volumeIsRemovableKey],
+                                                      options: .skipsHiddenFiles) {
+            for volume in volumes {
+                if let resourceValues = try? volume.resourceValues(forKeys: [.volumeIsRemovableKey]),
+                   let isRemovable = resourceValues.volumeIsRemovable,
+                   isRemovable {
+                    print("✅ External storage ditemukan: \(volume.path)")
+                    externalStorageURL = volume
+                    return
+                }
+            }
+        }
+        
+        // Method 2: Cek /private/var/mobile/Media untuk external storage
+        let possiblePaths = [
+            "/private/var/mobile/Media/DCIM",  // Untuk Lightning to USB adapter
+            "/var/mobile/Media/DCIM",
+            "/private/var/mobile/Media/ExternalStorage",
+            "/var/mobile/Media/ExternalStorage"
+        ]
+        
+        for path in possiblePaths {
+            if fm.fileExists(atPath: path) {
+                var isDirectory: ObjCBool = false
+                if fm.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue {
+                    // Cek apakah bisa write (untuk memastikan ini external storage)
+                    let testFile = URL(fileURLWithPath: path).appendingPathComponent(".test_write")
+                    if (try? Data().write(to: testFile)) != nil {
+                        try? fm.removeItem(at: testFile)
+                        print("✅ External storage ditemukan di: \(path)")
+                        externalStorageURL = URL(fileURLWithPath: path)
+                        return
+                    }
+                }
+            }
+        }
+        
+        print("ℹ️ External storage tidak ditemukan - gunakan internal storage")
     }
     
     func getAvailableStorages() -> [StorageInfo] {
@@ -41,10 +84,12 @@ class StorageManager {
         ))
         
         // External storage - cek ketersediaan
-        if let externalURL = getUSBDriveURL() {
+        scanForExternalStorage() // Refresh scan
+        
+        if let externalURL = externalStorageURL {
             storages.append(StorageInfo(
                 type: .external,
-                name: "USB Drive",
+                name: "External Storage",
                 path: externalURL.path,
                 isAvailable: true
             ))
@@ -52,7 +97,7 @@ class StorageManager {
             storages.append(StorageInfo(
                 type: .external,
                 name: "External Storage",
-                path: "Not Available",
+                path: "Not Connected",
                 isAvailable: false
             ))
         }
@@ -61,60 +106,58 @@ class StorageManager {
     }
     
     func getUSBDriveURL() -> URL? {
-        let fm = FileManager.default
-        
-        // Cek semua possible path untuk USB drive
-        for path in usbDrivePaths {
-            if fm.fileExists(atPath: path) {
-                var isDirectory: ObjCBool = false
-                if fm.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue {
-                    print("✅ USB Drive ditemukan di: \(path)")
-                    return URL(fileURLWithPath: path)
-                }
-            }
-        }
-        
-        print("❌ USB Drive tidak ditemukan")
-        return nil
+        scanForExternalStorage() // Refresh scan
+        return externalStorageURL
     }
     
     func isExternalStorageAvailable() -> Bool {
-        return getUSBDriveURL() != nil
+        scanForExternalStorage() // Refresh scan
+        return externalStorageURL != nil
     }
     
     func getSaveDirectory(forExternal: Bool) -> URL {
         if forExternal {
-            guard let usbURL = getUSBDriveURL() else {
+            guard let externalURL = getUSBDriveURL() else {
                 print("⚠️ External storage tidak tersedia, fallback ke internal")
-                return internalDocumentsURL
+                return getSaveDirectory(forExternal: false)
             }
             
-            let cameraDir = usbURL.appendingPathComponent("DCIM/ExternCamera", isDirectory: true)
+            let cameraDir = externalURL.appendingPathComponent("ExternCamera", isDirectory: true)
             let fm = FileManager.default
             
             // Buat folder jika belum ada
             if !fm.fileExists(atPath: cameraDir.path) {
                 do {
                     try fm.createDirectory(at: cameraDir, withIntermediateDirectories: true, attributes: nil)
-                    print("✅ Folder dibuat di: \(cameraDir.path)")
+                    print("✅ External folder dibuat: \(cameraDir.path)")
                 } catch {
-                    print("❌ Gagal buat folder: \(error.localizedDescription)")
-                    return internalDocumentsURL
+                    print("❌ Gagal buat folder external: \(error.localizedDescription)")
+                    return getSaveDirectory(forExternal: false)
                 }
             }
             
             return cameraDir
         } else {
-            // Internal storage
-            let cameraDir = internalDocumentsURL.appendingPathComponent("DCIM", isDirectory: true)
+            // Internal storage - gunakan Documents/ExternCamera
+            let cameraDir = internalDocumentsURL.appendingPathComponent("ExternCamera", isDirectory: true)
             let fm = FileManager.default
             
             if !fm.fileExists(atPath: cameraDir.path) {
-                try? fm.createDirectory(at: cameraDir, withIntermediateDirectories: true, attributes: nil)
+                do {
+                    try fm.createDirectory(at: cameraDir, withIntermediateDirectories: true, attributes: nil)
+                    print("✅ Internal folder dibuat: \(cameraDir.path)")
+                } catch {
+                    print("❌ Gagal buat folder internal: \(error)")
+                }
             }
             
             return cameraDir
         }
+    }
+    
+    // Refresh scan untuk external storage
+    func refreshExternalStorage() {
+        scanForExternalStorage()
     }
     
     func getStorageSpace(for type: StorageType) -> (total: Int64, free: Int64)? {
