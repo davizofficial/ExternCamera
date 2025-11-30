@@ -29,6 +29,7 @@
 		A10000021 /* CameraSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020 /* CameraSettings.swift */; };
 		A10000022 /* ModeSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000021 /* ModeSelectorView.swift */; };
 		A10000023 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000022 /* GalleryViewController.swift */; };
+		A10000024 /* SquareFrameOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000023 /* SquareFrameOverlay.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		A20000020 /* CameraSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSettings.swift; sourceTree = "<group>"; };
 		A20000021 /* ModeSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeSelectorView.swift; sourceTree = "<group>"; };
 		A20000022 /* GalleryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewController.swift; sourceTree = "<group>"; };
+		A20000023 /* SquareFrameOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareFrameOverlay.swift; sourceTree = "<group>"; };
 		A30000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A40000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -125,6 +127,7 @@
 				A20000014 /* ToggleCameraButton.swift */,
 				A20000015 /* ZoomSliderView.swift */,
 				A20000021 /* ModeSelectorView.swift */,
+				A20000023 /* SquareFrameOverlay.swift */,
 			);
 			name = UI;
 			path = UI;
@@ -242,6 +245,7 @@
 				A10000021 /* CameraSettings.swift in Sources */,
 				A10000022 /* ModeSelectorView.swift in Sources */,
 				A10000023 /* GalleryViewController.swift in Sources */,
+				A10000024 /* SquareFrameOverlay.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

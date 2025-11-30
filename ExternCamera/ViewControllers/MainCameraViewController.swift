@@ -440,8 +440,6 @@ class MainCameraViewController: UIViewController {
     }
     
     private func capturePanoramaFrame() {
-        let useExternal = (selectedStorageType == .external)
-        
         cameraManager.capturePhoto(toExternal: false) { [weak self] success, url in
             guard let self = self, success, let url = url else { return }
             
