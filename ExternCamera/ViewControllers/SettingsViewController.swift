@@ -150,7 +150,8 @@ extension SettingsViewController: UITableViewDataSource {
         case .video:
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             cell.textLabel?.text = "Record Video"
-            cell.detailTextLabel?.text = "1080p at 30 fps"
+            let resolution = settings.videoResolution
+            cell.detailTextLabel?.text = resolution.displayName
             cell.accessoryType = .disclosureIndicator
             return cell
             
@@ -206,6 +207,8 @@ extension SettingsViewController: UITableViewDelegate {
         
         if section == .storage && indexPath.row == 0 {
             showStorageSelection()
+        } else if section == .video && indexPath.row == 0 {
+            showVideoResolutionSelection()
         }
     }
     
@@ -215,6 +218,31 @@ extension SettingsViewController: UITableViewDelegate {
         storageVC.modalPresentationStyle = .overFullScreen
         storageVC.modalTransitionStyle = .crossDissolve
         present(storageVC, animated: true)
+    }
+    
+    private func showVideoResolutionSelection() {
+        let cameraManager = CameraManager()
+        let availableResolutions = cameraManager.getSupportedResolutions()
+        let currentResolution = settings.videoResolution
+        
+        let resolutionVC = VideoResolutionViewController(
+            currentResolution: currentResolution,
+            availableResolutions: availableResolutions
+        )
+        
+        resolutionVC.onSelect = { [weak self] resolution in
+            self?.tableView.reloadData()
+            
+            // Show success animation
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
+        }
+        
+        let navController = UINavigationController(rootViewController: resolutionVC)
+        navController.modalPresentationStyle = .pageSheet
+        
+        // Animate presentation
+        present(navController, animated: true)
     }
 }
 

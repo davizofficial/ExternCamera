@@ -450,6 +450,10 @@ class MainCameraViewController: UIViewController {
     }
     
     @objc private func didTapSettings() {
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        
         let settingsVC = SettingsViewController()
         settingsVC.currentStorageType = selectedStorageType
         settingsVC.onStorageChange = { [weak self] type in
@@ -459,6 +463,13 @@ class MainCameraViewController: UIViewController {
         
         let navController = UINavigationController(rootViewController: settingsVC)
         navController.modalPresentationStyle = .pageSheet
+        
+        // Smooth animation
+        if let sheet = navController.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+        
         present(navController, animated: true)
     }
     

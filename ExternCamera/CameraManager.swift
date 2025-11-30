@@ -190,6 +190,9 @@ extension CameraManager {
             return
         }
         
+        // Apply video resolution settings
+        applyVideoResolution()
+        
         let filename = "VID_\(Date().toString()).mov"
         let saveDirectory = StorageManager.shared.getSaveDirectory(forExternal: toExternal)
         let url = saveDirectory.appendingPathComponent(filename)
@@ -204,6 +207,89 @@ extension CameraManager {
         }
         
         videoOutput.startRecording(to: url, recordingDelegate: videoCaptureDelegate!)
+    }
+    
+    private func applyVideoResolution() {
+        let resolution = CameraSettings.shared.videoResolution
+        
+        guard let device = videoDeviceInput?.device else { return }
+        
+        do {
+            try device.lockForConfiguration()
+            
+            // Find matching format
+            let formats = device.formats.filter { format in
+                let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+                let width = Int(dimensions.width)
+                let height = Int(dimensions.height)
+                
+                return width == resolution.width && height == resolution.height
+            }
+            
+            // Find format with matching FPS
+            if let matchingFormat = formats.first(where: { format in
+                format.videoSupportedFrameRateRanges.contains { range in
+                    Int(range.maxFrameRate) >= resolution.fps
+                }
+            }) {
+                device.activeFormat = matchingFormat
+                device.activeVideoMinFrameDuration = CMTime(value: 1, timescale: CMTimeScale(resolution.fps))
+                device.activeVideoMaxFrameDuration = CMTime(value: 1, timescale: CMTimeScale(resolution.fps))
+                
+                print("✅ Video resolution set to: \(resolution.displayName)")
+            }
+            
+            device.unlockForConfiguration()
+        } catch {
+            print("❌ Failed to set video resolution: \(error)")
+        }
+    }
+    
+    func getSupportedResolutions() -> [VideoResolution] {
+        guard let device = videoDeviceInput?.device else {
+            return [.available1080p30]
+        }
+        
+        var resolutions: [VideoResolution] = []
+        var addedResolutions = Set<String>()
+        
+        for format in device.formats {
+            let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+            let width = Int(dimensions.width)
+            let height = Int(dimensions.height)
+            
+            for range in format.videoSupportedFrameRateRanges {
+                let maxFps = Int(range.maxFrameRate)
+                
+                // Only add common FPS values
+                let fpsValues = [30, 60].filter { $0 <= maxFps }
+                
+                for fps in fpsValues {
+                    let key = "\(width)x\(height)@\(fps)"
+                    if !addedResolutions.contains(key) {
+                        let preset: AVCaptureSession.Preset
+                        if width >= 3840 {
+                            preset = .hd4K3840x2160
+                        } else if width >= 1920 {
+                            preset = .hd1920x1080
+                        } else {
+                            preset = .hd1280x720
+                        }
+                        
+                        resolutions.append(VideoResolution(width: width, height: height, fps: fps, preset: preset))
+                        addedResolutions.insert(key)
+                    }
+                }
+            }
+        }
+        
+        // Sort by resolution and FPS
+        return resolutions.sorted { res1, res2 in
+            if res1.width != res2.width {
+                return res1.width > res2.width
+            }
+            return res1.fps > res2.fps
+        }
     }
     
     func stopRecording() {
