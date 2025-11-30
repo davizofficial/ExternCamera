@@ -40,10 +40,6 @@ class MainCameraViewController: UIViewController {
     private let recordingLabel = UILabel()
     private let zoomSlider = UISlider()
     
-    // Panorama
-    private var panoramaImages: [UIImage] = []
-    private var isPanoramaMode = false
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -363,7 +359,8 @@ class MainCameraViewController: UIViewController {
         case .video:
             toggleVideoRecording()
         case .pano:
-            capturePanorama()
+            // Panorama mode disabled
+            showAlert(title: "Coming Soon", message: "Panorama mode will be available in future update")
         }
     }
     
@@ -409,138 +406,7 @@ class MainCameraViewController: UIViewController {
             }
         }
     }
-    
-    private func capturePanorama() {
-        if !isPanoramaMode {
-            // Start panorama mode
-            isPanoramaMode = true
-            panoramaImages = []
-            showPanoramaInstructions()
-            
-            // Change capture button appearance
-            captureButton.setTitle("Capture Frame", for: .normal)
-            captureButton.backgroundColor = .systemGreen
-        } else {
-            // Capture current frame
-            capturePanoramaFrame()
-        }
-    }
-    
-    private func showPanoramaInstructions() {
-        let alert = UIAlertController(
-            title: "Panorama Mode",
-            message: "Tap the capture button to take multiple photos. Move camera slowly between shots. Tap 'Done' when finished.",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "Start", style: .default))
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
-            self?.cancelPanorama()
-        })
-        present(alert, animated: true)
-    }
-    
-    private func capturePanoramaFrame() {
-        cameraManager.capturePhoto(toExternal: false) { [weak self] success, url in
-            guard let self = self, success, let url = url else { return }
-            
-            // Load captured image
-            if let image = UIImage(contentsOfFile: url.path) {
-                self.panoramaImages.append(image)
-                
-                // Show progress
-                let count = self.panoramaImages.count
-                self.showAlert(title: "Frame \(count) Captured", message: "Captured \(count) frame(s). Move camera and tap again, or tap 'Done'.")
-                
-                // After 3+ frames, offer to finish
-                if count >= 3 {
-                    self.offerToFinishPanorama()
-                }
-            }
-        }
-    }
-    
-    private func offerToFinishPanorama() {
-        let alert = UIAlertController(
-            title: "Panorama Progress",
-            message: "You have captured \(panoramaImages.count) frames. Continue or finish?",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "Continue", style: .default))
-        alert.addAction(UIAlertAction(title: "Finish", style: .default) { [weak self] _ in
-            self?.finishPanorama()
-        })
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { [weak self] _ in
-            self?.cancelPanorama()
-        })
-        present(alert, animated: true)
-    }
-    
-    private func finishPanorama() {
-        guard panoramaImages.count >= 2 else {
-            showAlert(title: "Error", message: "Need at least 2 frames for panorama")
-            return
-        }
-        
-        // Stitch images horizontally
-        let stitchedImage = stitchPanoramaImages(panoramaImages)
-        
-        // Save stitched panorama
-        let useExternal = (selectedStorageType == .external)
-        savePanoramaImage(stitchedImage, toExternal: useExternal)
-        
-        // Reset panorama mode
-        isPanoramaMode = false
-        panoramaImages = []
-        captureButton.setTitle(nil, for: .normal)
-        captureButton.backgroundColor = .clear
-        
-        showAlert(title: "Success", message: "Panorama saved!")
-    }
-    
-    private func cancelPanorama() {
-        isPanoramaMode = false
-        panoramaImages = []
-        captureButton.setTitle(nil, for: .normal)
-        captureButton.backgroundColor = .clear
-    }
-    
-    private func stitchPanoramaImages(_ images: [UIImage]) -> UIImage {
-        // Simple horizontal stitching
-        let totalWidth = images.reduce(0) { $0 + $1.size.width }
-        let maxHeight = images.map { $0.size.height }.max() ?? 0
-        
-        let size = CGSize(width: totalWidth, height: maxHeight)
-        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-        
-        var xOffset: CGFloat = 0
-        for image in images {
-            image.draw(at: CGPoint(x: xOffset, y: 0))
-            xOffset += image.size.width
-        }
-        
-        let stitchedImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
-        UIGraphicsEndImageContext()
-        
-        return stitchedImage
-    }
-    
-    private func savePanoramaImage(_ image: UIImage, toExternal: Bool) {
-        guard let imageData = image.jpegData(compressionQuality: 0.9) else { return }
-        
-        let directory = storageManager.getSaveDirectory(forExternal: toExternal)
-        let filename = "PANO_\(Date().toString()).jpg"
-        let fileURL = directory.appendingPathComponent(filename)
-        
-        do {
-            try imageData.write(to: fileURL)
-            print("✅ Panorama saved: \(fileURL.path)")
-            updateThumbnail()
-            showSaveConfirmation(path: fileURL.path)
-        } catch {
-            print("❌ Failed to save panorama: \(error)")
-            showAlert(title: "Error", message: "Failed to save panorama")
-        }
-    }
+
     
     private func toggleVideoRecording() {
         if isRecording {
@@ -686,32 +552,63 @@ class MainCameraViewController: UIViewController {
     
     // MARK: - UI Updates
     private func updateUIForMode() {
-        captureButton.mode = currentMode
+        // Animasi smooth saat ganti mode
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut], animations: {
+            // Update capture button dengan animasi
+            self.captureButton.mode = self.currentMode
+            self.captureButton.alpha = 0.5
+            
+            // Show/hide square frame overlay dengan fade animation
+            if self.currentMode == .square {
+                self.squareFrameOverlay.isHidden = false
+                self.squareFrameOverlay.alpha = 0
+            } else {
+                self.squareFrameOverlay.alpha = 0
+            }
+        }) { _ in
+            UIView.animate(withDuration: 0.3) {
+                self.captureButton.alpha = 1.0
+                
+                if self.currentMode == .square {
+                    self.squareFrameOverlay.alpha = 1.0
+                } else {
+                    self.squareFrameOverlay.isHidden = true
+                }
+            }
+        }
         
-        // Show/hide square frame overlay
-        squareFrameOverlay.isHidden = (currentMode != .square)
-        
-        switch currentMode {
-        case .video:
-            flashButton.isHidden = false
-            hdrButton.isHidden = true
-            livePhotoButton.isHidden = true
-            timerButton.isHidden = true
-        case .photo:
-            flashButton.isHidden = false
-            hdrButton.isHidden = false
-            livePhotoButton.isHidden = false
-            timerButton.isHidden = false
-        case .square:
-            flashButton.isHidden = false
-            hdrButton.isHidden = false
-            livePhotoButton.isHidden = true
-            timerButton.isHidden = false
-        case .pano:
-            flashButton.isHidden = true
-            hdrButton.isHidden = true
-            livePhotoButton.isHidden = true
-            timerButton.isHidden = false
+        // Animasi fade untuk top controls
+        UIView.animate(withDuration: 0.25, animations: {
+            self.topControlsView.alpha = 0.3
+        }) { _ in
+            // Update visibility setelah fade out
+            switch self.currentMode {
+            case .video:
+                self.flashButton.isHidden = false
+                self.hdrButton.isHidden = true
+                self.livePhotoButton.isHidden = true
+                self.timerButton.isHidden = true
+            case .photo:
+                self.flashButton.isHidden = false
+                self.hdrButton.isHidden = false
+                self.livePhotoButton.isHidden = false
+                self.timerButton.isHidden = false
+            case .square:
+                self.flashButton.isHidden = false
+                self.hdrButton.isHidden = false
+                self.livePhotoButton.isHidden = true
+                self.timerButton.isHidden = false
+            case .pano:
+                self.flashButton.isHidden = true
+                self.hdrButton.isHidden = true
+                self.livePhotoButton.isHidden = true
+                self.timerButton.isHidden = false
+            }
+            
+            // Fade in dengan controls baru
+            UIView.animate(withDuration: 0.25) {
+                self.topControlsView.alpha = 1.0
+            }
         }
         
         // Update button states

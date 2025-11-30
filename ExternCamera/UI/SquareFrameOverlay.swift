@@ -27,23 +27,23 @@ class SquareFrameOverlay: UIView {
         let squareY = (rect.height - squareSize) / 2
         let squareFrame = CGRect(x: 0, y: squareY, width: squareSize, height: squareSize)
         
-        // Draw black overlay on top and bottom
-        context.setFillColor(UIColor.black.withAlphaComponent(0.7).cgColor)
+        // Draw BLACK SOLID overlay on top and bottom (tidak transparan)
+        context.setFillColor(UIColor.black.cgColor)
         
-        // Top overlay
+        // Top overlay - HITAM SOLID
         if squareY > 0 {
             context.fill(CGRect(x: 0, y: 0, width: rect.width, height: squareY))
         }
         
-        // Bottom overlay
+        // Bottom overlay - HITAM SOLID
         let bottomY = squareY + squareSize
         if bottomY < rect.height {
             context.fill(CGRect(x: 0, y: bottomY, width: rect.width, height: rect.height - bottomY))
         }
         
-        // Draw white border around square frame
-        context.setStrokeColor(UIColor.white.withAlphaComponent(0.5).cgColor)
-        context.setLineWidth(1.0)
+        // Draw white border around square frame untuk menandai area foto
+        context.setStrokeColor(UIColor.white.cgColor)
+        context.setLineWidth(2.0)
         context.stroke(squareFrame)
     }
 }

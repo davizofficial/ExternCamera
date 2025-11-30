@@ -70,17 +70,15 @@ class CaptureButton: UIButton {
                 self.innerCircle.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
                 self.outerRing.layer.borderColor = UIColor.systemRed.cgColor
             } else {
-                // Normal: lingkaran putih/merah/hitam
+                // Normal: lingkaran putih/merah
                 self.innerCircle.layer.cornerRadius = 30
                 self.innerCircle.transform = .identity
                 self.outerRing.layer.borderColor = UIColor.black.withAlphaComponent(0.3).cgColor
                 
                 if self.mode == .video {
                     self.innerCircle.backgroundColor = .systemRed
-                } else if self.mode == .square {
-                    // Square mode: background hitam
-                    self.innerCircle.backgroundColor = .black
                 } else {
+                    // Photo dan Square mode: background putih
                     self.innerCircle.backgroundColor = .white
                 }
             }
