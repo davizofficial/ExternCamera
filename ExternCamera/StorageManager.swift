@@ -262,7 +262,7 @@ class StorageManager {
     
     // Refresh scan untuk external storage
     func refreshExternalStorage() {
-        scanForExternalStorage()
+        scanAllStorages()
     }
     
     func getStorageSpace(for type: StorageType) -> (total: Int64, free: Int64)? {
