@@ -14,6 +14,7 @@ class SettingsViewController: UIViewController {
         case camera
         case photo
         case video
+        case debug
         case about
     }
     
@@ -71,6 +72,7 @@ extension SettingsViewController: UITableViewDataSource {
         case .camera: return 2
         case .photo: return 2
         case .video: return 1
+        case .debug: return 2
         case .about: return 2
         }
     }
@@ -176,6 +178,21 @@ extension SettingsViewController: UITableViewDataSource {
             cell.accessoryType = .disclosureIndicator
             return cell
             
+        case .debug:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+            
+            if indexPath.row == 0 {
+                cell.textLabel?.text = "🔍 Debug All Paths"
+                cell.textLabel?.textColor = .systemBlue
+                cell.accessoryType = .disclosureIndicator
+            } else {
+                cell.textLabel?.text = "🔄 Refresh Storage Scan"
+                cell.textLabel?.textColor = .systemOrange
+                cell.accessoryType = .disclosureIndicator
+            }
+            
+            return cell
+            
         case .about:
             let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
             cell.selectionStyle = .none
@@ -203,6 +220,7 @@ extension SettingsViewController: UITableViewDataSource {
         case .camera: return "Camera"
         case .photo: return "Photo"
         case .video: return "Video"
+        case .debug: return "Debug Tools"
         case .about: return "About"
         }
     }
@@ -215,6 +233,8 @@ extension SettingsViewController: UITableViewDataSource {
             return "All detected storages are listed above. Green = writable, Red = read-only. Connect USB/SD card via Lightning adapter for external storage."
         case .photo:
             return "HDR blends the best parts of separate exposures into a single photo. Live Photo captures 1.5 seconds of motion."
+        case .debug:
+            return "Debug tools untuk melihat semua path yang dicoba dan refresh storage detection. Check Xcode console untuk output detail."
         default:
             return nil
         }
@@ -268,6 +288,32 @@ extension SettingsViewController: UITableViewDelegate {
                     alert.addAction(UIAlertAction(title: "OK", style: .default))
                     present(alert, animated: true)
                 }
+            }
+        } else if section == .debug {
+            if indexPath.row == 0 {
+                // Debug all paths
+                storageManager.debugPrintAllPaths()
+                
+                let alert = UIAlertController(
+                    title: "Debug Output",
+                    message: "Check Xcode console untuk melihat semua path yang dicoba. Buka Window → Devices and Simulators → View Device Logs.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                present(alert, animated: true)
+            } else {
+                // Refresh storage scan
+                storageManager.refreshExternalStorage()
+                tableView.reloadData()
+                
+                let storages = storageManager.getAvailableStorages()
+                let alert = UIAlertController(
+                    title: "Storage Refreshed",
+                    message: "Found \(storages.count) storage(s). Check console for details.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                present(alert, animated: true)
             }
         } else if section == .video && indexPath.row == 0 {
             showVideoResolutionSelection()
